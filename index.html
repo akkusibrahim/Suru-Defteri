@@ -1,0 +1,1254 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1E6B4F"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Sürü Defteri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: tek sütun, telefon öncelikli. Altta sabit gezinme, formlar alttan açılan sayfa.
+   Küpe numaraları gerçek küpe gibi sarı etiket olarak gösterilir. */
+:root{
+  --bg:#F2F5F2; --surface:#FFFFFF; --surface2:#E7EDE8; --fg:#17231D; --muted:#58695F; --line:#D3DDD6;
+  --accent:#1D6A51; --accent-fg:#FFFFFF; --accent-soft:#D9EADF;
+  --warn:#935500; --warn-soft:#FAE9C6; --bad:#B3261E; --bad-soft:#F8DDDA;
+  --tag:#F2C230; --tag-fg:#2A2100;
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101613; --surface:#18201C; --surface2:#212B26; --fg:#E6EEE9; --muted:#9AAAA1; --line:#2B3731;
+    --accent:#5CC49E; --accent-fg:#06241A; --accent-soft:#1F3A30;
+    --warn:#F0B44C; --warn-soft:#3A2D12; --bad:#FF8A80; --bad-soft:#40201E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101613; --surface:#18201C; --surface2:#212B26; --fg:#E6EEE9; --muted:#9AAAA1; --line:#2B3731;
+  --accent:#5CC49E; --accent-fg:#06241A; --accent-soft:#1F3A30;
+  --warn:#F0B44C; --warn-soft:#3A2D12; --bad:#FF8A80; --bad-soft:#40201E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--fg); font:16px/1.5 var(--body); -webkit-text-size-adjust:100%;
+  padding-block:8px 104px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:720px;margin:0 auto}
+a{color:inherit}
+h1,h2,h3{margin:0}
+h2{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+h3{font:600 15px/1.2 var(--body);margin-bottom:10px}
+.muted{color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:10px 0 6px}
+.top h1{font:600 28px/1 var(--display);letter-spacing:.03em;text-transform:uppercase}
+.top .date{color:var(--muted);font-size:13px;text-align:right}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:10px 0}
+.banner.bad{background:var(--bad-soft);color:var(--bad)}
+.avatar svg{width:58%;height:58%}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.mgrid>div{display:grid;gap:2px;min-width:0}
+.mgrid b{font:600 20px/1.1 var(--display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.gain{color:var(--accent)} .loss{color:var(--bad)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border-block:1px solid var(--line)}
+.stats>div{padding:12px 4px;text-align:center;min-width:0}
+.stats>div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font:600 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.stats span{font-size:12.5px;color:var(--muted)}
+
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{font:600 15px/1 var(--body);padding:13px 16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:10px 13px;font-size:14px;min-height:40px}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.empty{text-align:center;padding:40px 8px}
+.empty p{margin:8px 0 18px;color:var(--muted)}
+
+.eartag{display:inline-flex;align-items:center;gap:6px;background:var(--tag);color:var(--tag-fg);font:600 14px/1 var(--display);letter-spacing:.05em;padding:3px 8px 3px 6px;border-radius:6px;white-space:nowrap}
+.eartag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.ok{background:var(--accent-soft);color:var(--accent)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+
+.ev{display:flex;gap:14px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;text-decoration:none}
+.evn{width:64px;text-align:center;flex:none;font-family:var(--display)}
+.evn b{display:block;font-size:30px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.evn small{font-size:12px;color:var(--muted);font-family:var(--body)}
+.evn.warn b{color:var(--warn)} .evn.bad b{color:var(--bad)}
+.evb{min-width:0}
+.evt{font-weight:600}
+.evs{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px}
+
+.pg{display:block;text-decoration:none;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.pg .l1,.pg .l2{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.pg .l2{font-size:13px;color:var(--muted);margin-top:8px}
+.track{height:8px;background:var(--surface2);border-radius:99px;margin-top:10px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:12px 0}
+.chips button{font:600 13px/1 var(--body);padding:9px 13px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--fg);white-space:nowrap;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+
+.acard{display:flex;gap:12px;align-items:center;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:8px;text-decoration:none}
+.avatar{width:68px;height:68px;border-radius:12px;background:var(--surface2);color:var(--muted);display:grid;place-items:center;font:600 24px/1 var(--display);flex:none;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.big{width:84px;height:84px;border-radius:16px;font-size:34px;border:0;cursor:pointer;padding:0}
+.abody{min-width:0;display:grid;gap:5px}
+.aname{font-weight:600;font-size:16px}
+.arow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ameta{font-size:13px;color:var(--muted)}
+
+.dhead{display:flex;gap:14px;align-items:center}
+.dhead h2{font:600 26px/1.05 var(--display);letter-spacing:.02em;text-transform:none;color:var(--fg);margin:0 0 6px}
+.pbig{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.pbig .d b{font:600 44px/1 var(--display);font-variant-numeric:tabular-nums}
+.pbig .d span{color:var(--muted)}
+.pbig .r{text-align:right;display:grid;gap:2px}
+.pbig .r b{font-size:16px}
+.pbig .r b.bad{color:var(--bad)}
+.pbig .r span{font-size:13px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:14px 0 0;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;text-align:right}
+.list>.li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);width:100%;background:none;border-inline:0;border-bottom:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.list>.li:first-child{border-top:0}
+.li .a{min-width:0}.li .a b{display:block}.li .a small{color:var(--muted)}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.hd h3{margin:0}
+
+.chart{width:100%;height:auto;display:block}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .gt{fill:var(--muted);font:9px var(--body)}
+.chart .bar{fill:var(--accent);opacity:.5}
+.chart .bar.last{opacity:1}
+
+.mrow{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.mrow:first-of-type{border-top:0}
+.mhead{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.mrow .who{min-width:0;display:grid;gap:4px}
+.mrow input{text-align:center;padding:10px 6px}
+.dnav{display:flex;gap:8px;align-items:center;margin-top:12px}
+.dnav input{flex:1;text-align:center}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.total b{font:600 40px/1 var(--display);font-variant-numeric:tabular-nums}
+
+.grid-ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.grid-ph button{padding:0;border:0;background:var(--surface2);border-radius:10px;overflow:hidden;aspect-ratio:1;cursor:pointer}
+.grid-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.bigph{width:100%;max-height:50vh;object-fit:contain;border-radius:12px;background:var(--surface2)}
+
+.big-cost{font:600 46px/1 var(--display);font-variant-numeric:tabular-nums}
+
+input,select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+textarea{resize:vertical}
+.field{display:grid;gap:5px}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+#nav .in{display:flex;gap:4px;width:100%;max-width:720px}
+#nav a{flex:1;min-width:0;display:grid;justify-items:center;gap:3px;text-align:center;padding:8px 2px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600}
+svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#nav svg{width:24px;height:24px}
+.svgi svg{width:1em;height:1em;display:block}.si .em.svgi{font-size:22px}
+.sum .sumi .em.svgi{font-size:38px}.sums.five .sumi .em.svgi{font-size:40px}#nav .em.svgi{font-size:26px}
+.chips.sg{margin:6px 0 0;flex-wrap:wrap;overflow:visible}.chips.sg button{padding:7px 11px;font-weight:500}
+.em{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-style:normal;font-weight:400;line-height:1;display:inline-block}
+#nav .em{font-size:22px}
+.tile .ti .em{font-size:24px}
+.sum .sumi .em{font-size:22px}
+.si .em{font-size:17px}
+.avatar .head{display:block;width:78%;height:78%}.avatar .head svg{width:100%;height:100%;display:block}
+.avatar .em{font-size:36px}
+.avatar.big .em{font-size:46px}
+.eartag.none{background:var(--surface2);color:var(--muted)}
+.eartag.none::before{display:none}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tile{display:flex;align-items:center;gap:12px;padding:12px;min-height:68px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 15px/1.2 var(--body);text-align:left;text-decoration:none;cursor:pointer;min-width:0}
+.tile .ti{flex:none;width:42px;height:42px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.tile .ti svg{width:24px;height:24px}
+.sums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sums.five{grid-template-columns:repeat(5,1fr)}
+.sum{display:grid;justify-items:center;gap:2px;padding:10px 2px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);text-decoration:none;cursor:pointer;min-width:0;font:inherit}
+.sum .sumi{color:var(--accent);display:grid}
+.sum .sumi svg{width:22px;height:22px}.sum .sumi .svgi svg{width:1em;height:1em}.svgi svg{stroke:none;filter:drop-shadow(0 0 .6px rgba(40,40,40,.65))}.sum .sumi{min-height:40px;align-content:center;justify-items:center}
+.sum b{font:600 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.sum .sl{font-size:12px;color:var(--muted);text-align:center}
+.sline{font-size:13.5px;font-weight:600;color:var(--muted)}
+.sline.ok{color:var(--accent)} .sline.warn{color:var(--warn)} .sline.bad{color:var(--bad)}
+.sicons{margin-left:auto;display:grid;grid-template-columns:repeat(2,30px);gap:6px;flex:none;align-self:center}
+.si{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface2);color:var(--muted)}
+.si svg{width:18px;height:18px}
+.si.ok{background:var(--accent-soft);color:var(--accent)} .si.warn{background:var(--warn-soft);color:var(--warn)} .si.bad{background:var(--bad-soft);color:var(--bad)}
+.legend{margin-top:14px;font-size:14px}
+.legend summary{cursor:pointer;color:var(--muted);font-weight:600}
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.lgi{display:flex;align-items:center;gap:8px;font-size:13px}
+.evd{font-size:13px;color:var(--muted);margin-top:2px}
+.li.tl{gap:10px;justify-content:flex-start}
+.tl .a{flex:1}
+.tdate{width:46px;flex:none;text-align:center;font-family:var(--display)}
+.tdate b{display:block;font-size:24px;line-height:1;font-weight:600}
+.tdate small{font:12px var(--body);color:var(--muted)}
+.ticon{flex:none;color:var(--muted);display:grid}
+.ticon svg{width:20px;height:20px}
+.rrow{display:grid;grid-template-columns:24px 1fr auto 56px;gap:4px 8px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.rrow:first-of-type{border-top:0}
+.ri{color:var(--accent);display:grid}.ri svg{width:20px;height:20px}
+.rrow .pct{text-align:right;font-size:13px}
+.rbar{grid-column:1/-1;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+#nav a[aria-current=page]{background:var(--accent-soft);color:var(--accent)}
+
+[hidden]{display:none!important}
+#sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.sheet-body{position:relative;width:100%;max-width:560px;max-height:90%;overflow:auto;background:var(--surface);border-radius:18px 18px 0 0;display:grid;gap:12px;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet-body h2{font:600 22px/1 var(--display);letter-spacing:.03em;text-transform:uppercase;color:var(--fg);margin:0}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;max-width:min(92vw,420px)}
+@media (prefers-reduced-motion:no-preference){.sheet-body{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.4}}}
+</style>
+
+<div class="wrap">
+  <header class="top"><h1>Sürü Defteri</h1><div class="date" id="today"></div></header>
+  <main id="view"></main>
+</div>
+<nav id="nav"><div class="in">
+  <a href="#bugun" data-r="bugun"><span class="em svgi" aria-hidden="true" data-svi="home"></span>Bugün</a>
+  <a href="#hayvanlar" data-r="hayvanlar"><span class="em svgi" aria-hidden="true" data-svi="h:Sürü"></span>Hayvanlar</a>
+  <a href="#sut" data-r="sut"><span class="em svgi" aria-hidden="true" data-svi="milk"></span>Süt</a>
+  <a href="#yem" data-r="yem"><span class="em" aria-hidden="true">🌾</span>Yem</a>
+  <a href="#rapor" data-r="rapor"><span class="em" aria-hidden="true">📊</span>Rapor</a>
+</div></nav>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+<input type="file" id="photoIn" accept="image/*" hidden>
+<input type="file" id="restoreIn" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+var GEST=280, DRY=60, CYCLE=21, PPW=60;
+var STATUSES=['Sağmal','Kuru','Düve','Buzağı','Tosun','Boğa'];
+var COLS=['animals','ins','births','milk','feed','health','rations','stock','meta','heats','money'];
+var RESULT={bekliyor:'Sonuç bekleniyor',gebe:'Gebe',bos:'Boş'};
+var MONF=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+var MON=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+var DAYN=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+
+var state={photos:[]}; COLS.forEach(function(c){state[c]=[]});
+var db=null, dlCap=null, loading=true, staleNote=false, localMode=false, dirty=false;
+var got={}, synced={}, MI=new Map(), DT=new Map();
+var filterV='Hepsi', milkDate=null, photoFor=null, photoUnsub=null, sheetDeleteFn=null, pending=null, toastT=null;
+var $=function(s){return document.querySelector(s)};
+var view=$('#view'), sheet=$('#sheet');
+
+/* ---------- yardımcılar ---------- */
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)};
+var pad=function(n){return String(n).padStart(2,'0')};
+var DAY=86400000;
+var toT=function(s){var p=s.split('-').map(Number);return Date.UTC(p[0],p[1]-1,p[2])};
+var fromT=function(t){return new Date(t).toISOString().slice(0,10)};
+var addDays=function(s,n){return fromT(toT(s)+n*DAY)};
+var diff=function(a,b){return Math.round((toT(a)-toT(b))/DAY)};
+var today=function(){var n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())};
+var dshort=function(s){var p=s.split('-').map(Number);return p[2]+' '+MON[p[1]-1]};
+var dlong=function(s){var p=s.split('-').map(Number);return p[2]+' '+MON[p[1]-1]+' '+p[0]};
+var fmtN=function(x,d){return Number(x).toLocaleString('tr-TR',{maximumFractionDigits:d==null?1:d})};
+var num=function(v){var x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:null};
+var relDay=function(d){var n=diff(today(),d);return n===0?'bugün':n===1?'dün':dshort(d)};
+var byName=function(a,b){return (a.name||a.tag||'').localeCompare(b.name||b.tag||'','tr')};
+var byId=function(id){return state.animals.find(function(a){return a.id===id})};
+var sum=function(arr,f){return arr.reduce(function(s,x){return s+f(x)},0)};
+var active=function(a){return !a.exitDate};
+var canBreed=function(a){return ['Sağmal','Kuru','Düve'].indexOf(a.status)>=0};
+var IC={
+  home:'<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  tag:'<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="8.5" cy="8.5" r="1.5"/>',
+  milk:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  feed:'<path d="M5 19c0-8 5-14 14-14 0 9-6 14-14 14z"/><path d="M5 19l8-8"/>',
+  save:'<path d="M12 3v12m-5-5l5 5 5-5M5 21h14"/>',
+  syringe:'<path d="M14 4l6 6M12 6l6 6-8 8-4 1 1-4zM3 21l4-4"/>',
+  heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  plus:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  flame:'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/>',
+  cross:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+  preg:'<circle cx="12" cy="5.5" r="2.5"/><path d="M12 9c-3 0-4.5 2-4.5 4.5 0 2 1.5 3 2 4.5V21h5v-3c.5-1.5 2-2.5 2-4.5C16.5 11 15 9 12 9z"/>',
+  dry:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M4 4l16 16"/>',
+  hourglass:'<path d="M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4"/>',
+  star:'<path d="M12 3l2.2 5.3L20 9l-4.3 3.8L17 18.5 12 15.5 7 18.5l1.3-5.7L4 9l5.8-.7z"/>',
+  exit:'<path d="M10 4H5v16h5M15 8l5 4-5 4M20 12H9"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  bars:'<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  cow:'<path d="M7.6 8.4C5 8 3 8.6 2 10.3c.9 1.7 3 2.2 5.4 1.6M16.4 8.4C19 8 21 8.6 22 10.3c-.9 1.7-3 2.2-5.4 1.6M9 6.3C8.2 5 8 3.8 8.6 2.6M15 6.3C15.8 5 16 3.8 15.4 2.6"/><path d="M9 6.2c2 -.6 4 -.6 6 0 .8 2.6.8 5.2.2 7.6-.3 1.2-.7 2-.9 3H9.7c-.2-1-.6-1.8-.9-3-.6-2.4-.6-5 .2-7.6z"/><ellipse cx="12" cy="18.2" rx="3.4" ry="2.5"/><path d="M10.8 18.2h.01M13.2 18.2h.01M9.9 11.2h.01M14.1 11.2h.01" stroke-width="2.4"/>',
+  bull:'<path d="M8.4 7.4C5.6 7.4 3.4 5.8 2.8 2.8M15.6 7.4c2.8 0 5-1.6 5.6-4.6"/><path d="M8.2 9.6C6 9.2 4.2 9.8 3.4 11.2c.8 1.5 2.7 1.9 4.8 1.3M15.8 9.6c2.2-.4 4 .2 4.8 1.6-.8 1.5-2.7 1.9-4.8 1.3"/><path d="M9 7.4c2-.6 4-.6 6 0 .8 2.4.8 4.8.2 7-.3 1.2-.7 2-.9 3H9.7c-.2-1-.6-1.8-.9-3-.6-2.2-.6-4.6.2-7z"/><path d="M10.9 17.6h.01M13.1 17.6h.01M9.9 11.6h.01M14.1 11.6h.01" stroke-width="2.4"/><path d="M10.2 20.4a1.9 1.9 0 0 0 3.6 0"/>'
+};
+var EM={cow:'🐮',bull:'🐂',milk:'🥛',dry:'💤',preg:'🤰',syringe:'💉',cross:'🩺',ban:'⛔',flame:'🔥',exit:'🚪',star:'✨',hourglass:'⏳',heart:'🍼',plus:'➕',home:'🏠',tag:'🏷️',feed:'🌾',save:'💾',bars:'📊'};
+var SVI={"home":"<svg viewBox=\"0 0 64 64\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M5 30L32 9l27 21v26H5Z\" fill=\"#C0432F\"/><path d=\"M5 30L32 9l27 21\" fill=\"none\" stroke=\"#8E2D1E\" stroke-width=\"3\" stroke-linejoin=\"round\"/><rect x=\"19\" y=\"31\" width=\"26\" height=\"25\" fill=\"#EBD8B0\"/><path d=\"M19 31h26v25H19ZM19 31l26 25M45 31L19 56\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"32\" cy=\"21\" r=\"3.5\" fill=\"#F4E3C0\"/></svg>","milk":"<svg viewBox=\"0 0 64 64\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M22 8h20v8H22Z\" fill=\"#78909C\"/><path d=\"M19 16h26l5 14v26H14V30Z\" fill=\"#CFD8DC\"/><path d=\"M14 30h36v6H14Z\" fill=\"#fff\"/><rect x=\"14\" y=\"52\" width=\"36\" height=\"5\" rx=\"1.5\" fill=\"#90A4AE\"/><path d=\"M32 38c0 0-6 6.5-6 10a6 6 0 0 0 12 0c0-3.5-6-10-6-10Z\" fill=\"#4DA3F7\"/><path d=\"M19 16c-7 1-9 7-9 12M45 16c7 1 9 7 9 12\" fill=\"none\" stroke=\"#78909C\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg>","preg":"<svg aria-hidden=\"true\" viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M21 18C18.5 15 17.5 12.5 17.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M43 18C45.5 15 46.5 12.5 46.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#FBF3E4\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#FBF3E4\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#FBF3E4\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#D9A66E\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#F8CDB4\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><g transform=\"translate(36 34)\"><circle cx=\"13\" cy=\"13\" r=\"13\" fill=\"#fff\" stroke=\"#F3C1D3\" stroke-width=\"1.5\"/><path d=\"M13 21c-6-4.2-8.2-7.2-8.2-10a4.2 4.2 0 0 1 8.2-1.6A4.2 4.2 0 0 1 21.2 11c0 2.8-2.2 5.8-8.2 10Z\" fill=\"#F06292\"/></g></g></svg>","syringe":"<svg viewBox=\"8 8 48 48\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M10 54l14-14\" stroke=\"#5E8DB8\" stroke-width=\"4\" stroke-linecap=\"round\"/><g transform=\"rotate(-45 32 32)\"><rect x=\"14\" y=\"24\" width=\"30\" height=\"14\" rx=\"3\" fill=\"#E3F2FD\" stroke=\"#5E8DB8\" stroke-width=\"3\"/><rect x=\"18\" y=\"27.5\" width=\"14\" height=\"7\" fill=\"#F4A6C0\"/><path d=\"M44 31h14\" stroke=\"#5E8DB8\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><path d=\"M14 31H6M6 22v18\" stroke=\"#5E8DB8\" stroke-width=\"3.5\" stroke-linecap=\"round\"/></g></svg>","flame":"<svg viewBox=\"0 0 64 64\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M32 59c-14 0-21-10-19-21 1-7 6-10 8-16 3 4 4 8 7 9 0-11 5-18 12-24 1 10 12 15 12 31 0 12-7 21-20 21Z\" fill=\"#F06292\"/><path d=\"M32 56c-8 0-12-5-11-12 1-4 4-7 6-10 2 3 3 5 5 5 1-5 3-9 7-12 1 7 5 9 5 17 0 8-4 12-12 12Z\" fill=\"#FF9DB5\"/></svg>","tag":"<svg viewBox=\"0 0 64 64\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M22 6h20l3 15H19Z\" fill=\"#E0A800\"/><circle cx=\"32\" cy=\"13\" r=\"3.2\" fill=\"#fff\"/><path d=\"M32 21v7\" stroke=\"#B88A00\" stroke-width=\"3.5\"/><rect x=\"13\" y=\"28\" width=\"38\" height=\"28\" rx=\"9\" fill=\"#F2C230\" stroke=\"#C99A0B\" stroke-width=\"3\"/><path d=\"M22 42h20M22 49h12\" stroke=\"#B88A00\" stroke-width=\"3.5\" stroke-linecap=\"round\"/></svg>","exit":"<svg viewBox=\"0 0 64 64\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><rect x=\"4\" y=\"18\" width=\"34\" height=\"28\" rx=\"3\" fill=\"#4DA3F7\"/><path d=\"M38 27h12l9 11v8H38Z\" fill=\"#2F6FB0\"/><path d=\"M42 30h7l5 8H42Z\" fill=\"#CFE8FF\"/><circle cx=\"17\" cy=\"48\" r=\"6.5\" fill=\"#37474F\"/><circle cx=\"17\" cy=\"48\" r=\"2.6\" fill=\"#CFD8DC\"/><circle cx=\"47\" cy=\"48\" r=\"6.5\" fill=\"#37474F\"/><circle cx=\"47\" cy=\"48\" r=\"2.6\" fill=\"#CFD8DC\"/></svg>"};
+var ALIAS={dry:'h:Kuru'};
+var ic=function(n){n=ALIAS[n]||n;if(n.indexOf('h:')===0&&HEADS[n.slice(2)])return '<span class="em svgi" aria-hidden="true">'+HEADS[n.slice(2)]+'</span>';if(SVI[n])return '<span class="em svgi" aria-hidden="true">'+SVI[n]+'</span>';return EM[n]?'<span class="em" aria-hidden="true">'+EM[n]+'</span>':'<svg viewBox="0 0 24 24" aria-hidden="true">'+(IC[n]||'')+'</svg>'};
+function aLbl(a){return (a.name||a.tag||'İsimsiz')+((a.name&&a.tag)?' · '+a.tag:'')}
+var BULLS=['Boğa','Tosun'];
+function sireOptions(keep){
+  var bulls=state.animals.filter(function(x){return (BULLS.indexOf(x.status)>=0&&active(x))||x.id===keep}).sort(byName).map(function(b){return {v:b.id,l:aLbl(b)}});
+  return [{v:'',l:'Bilinmiyor'}].concat(bulls,[{v:'__d',l:'Sürüde yok (pipet / başka çiftlik)'}]);
+}
+function sireFields(ex){
+  var cur=ex?(ex.sireId||(ex.sire?'__d':'')):'';
+  return [
+    {name:'sireId',label:'Güve (baba)',type:'select',options:sireOptions(ex&&ex.sireId),value:cur},
+    {name:'sire',label:'Pipet kodu veya boğa adı',value:(ex&&!ex.sireId)?ex.sire:'',showIf:['sireId','__d'],ph:'Örn. pipet kodu ya da komşunun boğası'}
+  ];
+}
+function resolveSire(v){
+  if(v.sireId&&v.sireId!=='__d'){var b=byId(v.sireId);v.sire=b?(b.name||b.tag):(v.sire||'')}
+  else{v.sire=v.sireId==='__d'?(v.sire||''):'';v.sireId=''}
+  return v;
+}
+function age(b){
+  if(!b) return '';
+  var t=today(), m=(+t.slice(0,4)-+b.slice(0,4))*12+(+t.slice(5,7)-+b.slice(5,7));
+  if(+t.slice(8)<+b.slice(8)) m--;
+  if(m<0) return '';
+  if(m<1) return diff(t,b)+' günlük';
+  var y=Math.floor(m/12), r=m%12;
+  return ((y?y+' yaş ':'')+(r?r+' ay':'')).trim();
+}
+function toast(msg){
+  var t=$('#toast'); t.textContent=msg; t.hidden=false;
+  clearTimeout(toastT); toastT=setTimeout(function(){t.hidden=true},3200);
+}
+function errText(e){
+  var c=e&&e.code;
+  if(c==='quota_exceeded') return 'Depolama dolu. Eski kayıtları silmeden yenisi eklenemez.';
+  if(c==='resource_exhausted') return 'Çok hızlı işlem yapıldı, birkaç saniye bekleyip tekrar deneyin.';
+  if(c==='invalid_argument') return 'Bu kayıt kaydedilemedi. Bu sayfayı yalnızca sahibi değiştirebilir.';
+  return (e&&e.message)||'İşlem yapılamadı.';
+}
+
+/* ---------- veri katmanı ---------- */
+var LS='suru-defteri-v1', STANDALONE=true, SEED=null;
+function getTheme(){try{return localStorage.getItem('suru-tema')||'auto'}catch(e){return 'auto'}}
+function applyTheme(v){var r=document.documentElement;if(v==='light'||v==='dark')r.setAttribute('data-theme',v);else r.removeAttribute('data-theme')}
+applyTheme(getTheme());
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('Tarayıcı belleği dolu.')}}
+function lsLoad(){try{var r=localStorage.getItem(LS);if(r===null)return SEED||{};return JSON.parse(r)||{}}catch(e){return SEED||{}}}
+async function rawSet(col,id,body){
+  if(db){await db.collection(col).doc(id).set(body)}
+  else{var arr=state[col]||(state[col]=[]),o=Object.assign({id:id},body),i=arr.findIndex(function(x){return x.id===id});if(i>=0)arr[i]=o;else arr.push(o)}
+}
+async function put(col,obj){
+  var id=obj.id||uid(), body=Object.assign({},obj); delete body.id;
+  await rawSet(col,id,body);
+  if(!db){lsSave();render(true)}
+  return id;
+}
+async function del(col,id){
+  if(db){await db.collection(col).doc(id).delete()}
+  else{state[col]=state[col].filter(function(x){return x.id!==id});lsSave();render(true)}
+}
+var queues={};
+function enq(key,fn){queues[key]=(queues[key]||Promise.resolve()).then(fn).catch(function(e){toast(errText(e))});return queues[key]}
+
+function startSync(){
+  COLS.forEach(function(c){
+    db.collection(c).onSnapshot(function(s){
+      state[c]=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});
+      got[c]=true; if(!s.metadata.fromCache) synced[c]=true;
+      if(Object.keys(got).length===COLS.length) loading=false;
+      if(Object.keys(synced).length===COLS.length) staleNote=false;
+      render();
+    },function(e){loading=false;toast(errText(e));render()});
+  });
+  setTimeout(function(){
+    if(Object.keys(synced).length<COLS.length){loading=false;staleNote=true;render()}
+  },10000);
+}
+function watchPhotos(id){
+  if(photoFor===id) return;
+  if(photoUnsub){photoUnsub();photoUnsub=null}
+  photoFor=id;
+  if(!db||!id){if(db)state.photos=[];return}
+  photoUnsub=db.collection('photos').where('animalId','==',id).onSnapshot(function(s){
+    state.photos=s.docs.map(function(d){return Object.assign({id:d.id},d.data())}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+    render();
+  },function(){});
+}
+
+/* ---------- hesaplar ---------- */
+function idx(){
+  MI=new Map(); DT=new Map();
+  state.milk.forEach(function(m){
+    MI.set(m.id,m);
+    DT.set(m.date,(DT.get(m.date)||0)+(m.am||0)+(m.pm||0));
+  });
+}
+function series(days,aid){
+  var t=today(),out=[];
+  for(var i=days-1;i>=0;i--){
+    var d=addDays(t,-i),v=null;
+    if(aid){var m=MI.get(aid+'_'+d);if(m)v=(m.am||0)+(m.pm||0)}
+    else if(DT.has(d)) v=DT.get(d);
+    out.push({d:d,v:v});
+  }
+  return out;
+}
+function avgOf(ser){var v=ser.filter(function(x){return x.v!=null});return v.length?sum(v,function(x){return x.v})/v.length:null}
+function lastBirth(id){
+  var d=state.births.filter(function(b){return b.animalId===id&&b.outcome!=='iptal'}).map(function(b){return b.date});
+  var a=byId(id); if(a&&a.calved) d.push(a.calved);
+  d.sort(); return d.length?d[d.length-1]:null;
+}
+function preg(a){
+  if(a.exitDate||!canBreed(a)) return null;
+  var lb=lastBirth(a.id);
+  var l=state.ins.filter(function(i){return i.animalId===a.id&&(!lb||i.date>lb)}).sort(function(x,y){return y.date.localeCompare(x.date)});
+  var i=l[0]; if(!i||i.result==='bos') return null;
+  var g=(a.gest>0)?a.gest:GEST, t=today(), exp=addDays(i.date,g);
+  return {ins:i,gest:g,day:diff(t,i.date),exp:exp,left:diff(exp,t),dry:addDays(exp,-DRY),check:addDays(i.date,30),heat:addDays(i.date,CYCLE),confirmed:i.result==='gebe'};
+}
+function lastHeat(a){
+  var lb=lastBirth(a.id), l=state.heats.filter(function(h){return h.animalId===a.id&&(!lb||h.date>lb)}).map(function(h){return h.date}).sort();
+  return l.length?l[l.length-1]:null;
+}
+/* Açık (gebe olmayan) hayvan için bir sonraki beklenen kızgınlık: son kızgınlık ya da son tohumlamadan 21 gün sonra */
+function nextHeat(a){
+  if(a.exitDate||!canBreed(a)||preg(a)) return null;
+  var lb=lastBirth(a.id), base=lastHeat(a);
+  state.ins.forEach(function(i){if(i.animalId===a.id&&(!lb||i.date>lb)&&(!base||i.date>base))base=i.date});
+  return base?addDays(base,CYCLE):null;
+}
+function withdrawal(a,on){
+  if(a.exitDate&&(!on||on>a.exitDate)) return null;
+  var t=on||today(),best=null;
+  state.health.forEach(function(h){
+    if(h.animalId!==a.id||!(h.wd>0)||h.date>t) return;
+    var until=addDays(h.date,h.wd);
+    if(until>=t&&(!best||until>best.until)) best={until:until,left:diff(until,t),what:h.note||h.type};
+  });
+  return best;
+}
+/* ---------- rasyon ve stok ---------- */
+var norm=function(s){return String(s||'').trim().toLocaleLowerCase('tr')};
+var hash=function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h).toString(36)};
+function settings(){var s=state.meta.find(function(x){return x.id==='settings'});return {targetDays:(s&&s.targetDays)||30}}
+function rationFor(a){
+  var own=state.rations.filter(function(r){return r.scope==='animal'&&r.key===a.id});
+  if(own.length) return {own:true,items:own};
+  return {own:false,items:state.rations.filter(function(r){return r.scope==='status'&&r.key===a.status})};
+}
+function animalNeed(a){
+  var r=rationFor(a), L=avgOf(series(7,a.id))||0;
+  return r.items.map(function(x){return {item:x.item,kg:(x.kg||0)+(x.perL||0)*L}});
+}
+function herdNeed(){
+  var m={};
+  state.animals.filter(active).forEach(function(a){
+    animalNeed(a).forEach(function(x){var k=norm(x.item);(m[k]||(m[k]={item:x.item,kg:0})).kg+=x.kg});
+  });
+  return m;
+}
+function lastPrice(item){
+  var k=norm(item), c=state.stock.concat(state.feed).filter(function(x){return norm(x.item)===k&&x.price}).sort(function(a,b){return b.date.localeCompare(a.date)});
+  return c.length?c[0].price:null;
+}
+function stockTable(){
+  var need=herdNeed(), m={}, first={};
+  Object.keys(need).forEach(function(k){m[k]={item:need[k].item,need:need[k].kg,stock:0}});
+  state.stock.forEach(function(x){
+    var k=norm(x.item); (m[k]||(m[k]={item:x.item,need:0,stock:0})).stock+=x.kg||0;
+    if(!first[k]||x.date<first[k]) first[k]=x.date;
+  });
+  state.feed.forEach(function(x){var k=norm(x.item);if(m[k]&&first[k]&&x.date>=first[k])m[k].stock-=x.kg||0});
+  return Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return a.item.localeCompare(b.item,'tr')});
+}
+function buildEvents(){
+  var t=today(),ev=[];
+  state.animals.forEach(function(a){
+    var p=preg(a);
+    if(p){
+      ev.push({d:p.exp,a:a,kind:'birth',title:p.confirmed?'Doğum bekleniyor':'Tahmini doğum'});
+      if(!p.confirmed){
+        ev.push({d:p.check,a:a,kind:'check',title:'Gebelik kontrolü'});
+        ev.push({d:p.heat,a:a,kind:'heat',title:'Tekrar kızgınlık gözle'});
+      }
+      if(a.status!=='Kuru') ev.push({d:p.dry,a:a,kind:'dry',title:'Kuruya çıkar'});
+    }
+    if(active(a)&&a.status==='Buzağı'&&a.birth) ev.push({d:addDays(a.birth,180),a:a,kind:'grow',title:'Buzağı 6 aylık oldu, durumunu güncelle'});
+    var w=withdrawal(a);
+    if(w) ev.push({d:w.until,a:a,kind:'wd',title:'Süt bekleme süresi bitiyor'});
+    var nh=nextHeat(a);
+    if(nh) ev.push({d:nh,a:a,kind:'heat2',title:'Kızgınlık beklenen gün'});
+    var lb2=lastBirth(a.id);
+    if(active(a)&&a.status==='Sağmal'&&!p&&lb2&&!(nh&&diff(nh,t)>=-2)&&!state.ins.some(function(i){return i.animalId===a.id&&i.date>lb2}))
+      ev.push({d:addDays(lb2,PPW),a:a,kind:'open',title:'Tohumlama zamanı'});
+    if(active(a)) state.health.forEach(function(x){if(x.animalId===a.id&&x.next) ev.push({d:x.next,a:a,kind:'health',title:(x.type||'Sağlık')+' hatırlatması',desc:x.note||''})});
+  });
+  var win={birth:[-20,45],check:[-30,14],heat:[-2,7],heat2:[-2,7],open:[-45,14],grow:[-730,14],dry:[-20,30],wd:[0,30],health:[-7,30]};
+  return ev.map(function(e){e.left=diff(e.d,t);return e})
+    .filter(function(e){var w=win[e.kind];return e.left>=w[0]&&e.left<=w[1]})
+    .map(function(e){e.tone=(e.left<0&&e.kind!=='heat'&&e.kind!=='heat2'&&e.kind!=='grow')?'bad':e.left<=7?'warn':'';return e})
+    .sort(function(x,y){return x.left-y.left});
+}
+
+/* ---------- parçalar ---------- */
+var eartag=function(a){return a.tag?'<span class="eartag">'+esc(a.tag)+'</span>':'<span class="eartag none">Küpe yok</span>'};
+var chip=function(t,c){return '<span class="chip '+(c||'')+'">'+esc(t)+'</span>'};
+var HEADS={"Sağmal":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M21 18C18.5 15 17.5 12.5 17.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M43 18C45.5 15 46.5 12.5 46.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#F4F2ED\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#B98053\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#F8CDB4\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"52\" cy=\"52\" r=\"10.5\" fill=\"#fff\" stroke=\"#C9D6E6\" stroke-width=\"1.5\"/><path d=\"M52 43.5C52 43.5 45.6 50.5 45.6 54.4a6.4 6.4 0 0 0 12.8 0C58.4 50.5 52 43.5 52 43.5Z\" fill=\"#4DA3F7\"/><path d=\"M49.2 54.2a3 3 0 0 0 2 2.8\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\"/></g></svg>","Kuru":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M21 18C18.5 15 17.5 12.5 17.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M43 18C45.5 15 46.5 12.5 46.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#F4F2ED\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#A9A39A\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#F8CDB4\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><path d=\"M20.5 33.5q3.5 3.2 7 0M36.5 33.5q3.5 3.2 7 0\" stroke=\"#1d1d1d\" stroke-width=\"2.4\" fill=\"none\" stroke-linecap=\"round\"/><text x=\"41\" y=\"20\" font-size=\"22\" font-weight=\"800\" font-family=\"Arial,sans-serif\" fill=\"#5C6BC0\">Z</text><text x=\"54\" y=\"8\" font-size=\"14\" font-weight=\"800\" font-family=\"Arial,sans-serif\" fill=\"#5C6BC0\">z</text></g></svg>","Düve":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M22 17.5C20.5 16 20 15 20 13.5\" stroke=\"#F2C230\" stroke-width=\"4\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M42 17.5C43.5 16 44 15 44 13.5\" stroke=\"#F2C230\" stroke-width=\"4\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#FBF3E4\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#FBF3E4\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#FBF3E4\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#D9A66E\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#F9D3BE\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><path d=\"M32 15.5L21.5 9.5V21.5Z\" fill=\"#F06292\"/><path d=\"M32 15.5L42.5 9.5V21.5Z\" fill=\"#F06292\"/><circle cx=\"32\" cy=\"15.5\" r=\"3.4\" fill=\"#C2185B\"/></g></svg>","Buzağı":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(0.9) translate(-32 -60)\"><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#F1D9B5\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#F1D9B5\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#F1D9B5\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#FFF7EA\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#FAD9C4\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"23.5\" cy=\"33\" r=\"4.4\" fill=\"#1d1d1d\"/><circle cx=\"40.5\" cy=\"33\" r=\"4.4\" fill=\"#1d1d1d\"/><circle cx=\"25\" cy=\"31.4\" r=\"1.6\" fill=\"#fff\"/><circle cx=\"42\" cy=\"31.4\" r=\"1.6\" fill=\"#fff\"/><g transform=\"translate(40 40) rotate(18 11 12)\"><rect x=\"3\" y=\"7\" width=\"12\" height=\"17\" rx=\"4\" fill=\"#fff\" stroke=\"#B7C7D6\" stroke-width=\"1.5\"/><rect x=\"3\" y=\"13\" width=\"12\" height=\"3\" fill=\"#8ECAE6\"/><rect x=\"5.6\" y=\"2.2\" width=\"6.8\" height=\"6\" rx=\"2.6\" fill=\"#F8A5B8\"/></g></g></svg>","Tosun":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M21 18.5C16 18 12.5 15 11.5 9.5\" stroke=\"#E8B923\" stroke-width=\"7.5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M43 18.5C48 18 51.5 15 52.5 9.5\" stroke=\"#E8B923\" stroke-width=\"7.5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#8A5A38\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#E8B48C\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#8A5A38\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#E8B48C\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#8A5A38\"/><path d=\"M29.5 13.5H34.5L35.5 33H28.5Z\" fill=\"#FFF8EE\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#E8B48C\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/></g></svg>","Boğa":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M19.5 20C9 20.5 3.2 14.5 3.5 2.5\" stroke=\"#F6EBCB\" stroke-width=\"9.5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M44.5 20C55 20.5 60.8 14.5 60.5 2.5\" stroke=\"#F6EBCB\" stroke-width=\"9.5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#4B3427\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#9C6B52\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#4B3427\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#9C6B52\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#4B3427\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#C99C7E\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#2A1D18\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#2A1D18\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><path d=\"M18.5 26.5L28.5 30.5M45.5 26.5L35.5 30.5\" stroke=\"#171717\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><circle cx=\"32\" cy=\"55\" r=\"3.8\" fill=\"none\" stroke=\"#F2B90F\" stroke-width=\"2.2\"/></g></svg>","Sürü":"<svg viewBox=\"-3 -6 70 70\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(32 60) scale(1) translate(-32 -60)\"><path d=\"M21 18C18.5 15 17.5 12.5 17.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><path d=\"M43 18C45.5 15 46.5 12.5 46.5 9.5\" stroke=\"#F2C230\" stroke-width=\"5\" stroke-linecap=\"round\" fill=\"none\"/><ellipse cx=\"10.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(-18 10.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"11.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(-18 11.5 29)\" fill=\"#F7C9B3\"/><ellipse cx=\"53.5\" cy=\"29\" rx=\"9.5\" ry=\"5.2\" transform=\"rotate(18 53.5 29)\" fill=\"#F4F2ED\"/><ellipse cx=\"52.5\" cy=\"29\" rx=\"5.5\" ry=\"2.8\" transform=\"rotate(18 52.5 29)\" fill=\"#F7C9B3\"/><path d=\"M19 20C19 11 45 11 45 20L47 40C47 52 41 58 32 58C23 58 17 52 17 40Z\" fill=\"#F4F2ED\"/><path d=\"M19.2 20C19.5 13 29 12.5 33 14.5C30 22 32.5 29 25 33.5C21 36 18.5 37.5 17.6 40Z\" fill=\"#B98053\"/><ellipse cx=\"32\" cy=\"48\" rx=\"12\" ry=\"8.5\" fill=\"#F8CDB4\"/><ellipse cx=\"27.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(-20 27.5 48)\" fill=\"#4A3B40\"/><ellipse cx=\"36.5\" cy=\"48\" rx=\"1.9\" ry=\"3\" transform=\"rotate(20 36.5 48)\" fill=\"#4A3B40\"/><circle cx=\"24\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/><circle cx=\"40\" cy=\"33\" r=\"2.8\" fill=\"#1d1d1d\"/></g></svg>"};
+document.querySelectorAll('[data-svi]').forEach(function(e){e.innerHTML=SVI[e.dataset.svi]||HEADS[e.dataset.svi.slice(2)]});
+function headOf(a){var k=HEADS[a.status]?a.status:(a.sex==='Erkek'?'Tosun':'Düve');return '<span class="head" aria-hidden="true">'+HEADS[k]+'</span>'}
+function avatar(a,big){
+  var isM=BULLS.indexOf(a.status)>=0||(a.status==='Buzağı'&&a.sex==='Erkek');
+  var inner=a.thumb?'<img src="'+a.thumb+'" alt="">':headOf(a);
+  return '<div class="avatar'+(big?' big':'')+'">'+inner+'</div>';
+}
+function mdur(n){n=Math.abs(n);if(n<30)return n+' gün';var t=today(),s=new Date((n>=0?t:t)+'T00:00:00'),e=new Date(addDays(t,n)+'T00:00:00'),m=(e.getFullYear()-s.getFullYear())*12+e.getMonth()-s.getMonth(),x=new Date(s);x.setMonth(s.getMonth()+m);if(x>e){m--;x=new Date(s);x.setMonth(s.getMonth()+m)}var d=Math.round((e-x)/864e5);return m+' ay'+(d?' '+d+' gün':'')}
+function pregChip(a){
+  var p=preg(a); if(!p) return '';
+  return p.confirmed?(p.left<0?chip('Doğum gecikti','bad'):chip('Doğuma '+mdur(p.left),'ok')):chip('Gebelik kontrolü bekliyor','warn');
+}
+function niceMax(x){var p=Math.pow(10,Math.floor(Math.log10(x)));var m=[1,1.2,1.5,2,2.5,3,4,5,6,8,10];for(var i=0;i<m.length;i++){if(m[i]*p>=x)return m[i]*p}return 10*p}
+function chart(ser,label){
+  var vals=ser.map(function(s){return s.v||0}), mx=niceMax(Math.max.apply(null,vals.concat([1])));
+  var W=320,H=124,L=32,B=18,T=8,R=4,pw=W-L-R,ph=H-T-B,n=ser.length,bw=pw/n,g='',last=-1;
+  ser.forEach(function(s,i){if(s.v)last=i});
+  [0,.5,1].forEach(function(f){var y=T+ph*(1-f);g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" class="gl"/><text x="'+(L-4)+'" y="'+(y+3)+'" text-anchor="end" class="gt">'+fmtN(mx*f)+'</text>'});
+  ser.forEach(function(s,i){
+    if(!s.v) return;
+    var h=ph*s.v/mx;
+    g+='<rect x="'+(L+i*bw+bw*.16).toFixed(1)+'" y="'+(T+ph-h).toFixed(1)+'" width="'+(bw*.68).toFixed(1)+'" height="'+h.toFixed(1)+'" rx="1.5" class="bar'+(i===last?' last':'')+'"/>';
+  });
+  g+='<text x="'+L+'" y="'+(H-4)+'" class="gt">'+dshort(ser[0].d)+'</text><text x="'+(W-R)+'" y="'+(H-4)+'" text-anchor="end" class="gt">'+dshort(ser[n-1].d)+'</text>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="chart" role="img" aria-label="'+esc(label)+'">'+g+'</svg>';
+}
+
+/* ---------- filtreler, durum cümlesi, simgeler ---------- */
+var isSick=function(a){
+  if(!active(a)) return false; var t=today();
+  return state.health.some(function(h){var n=diff(t,h.date);return h.animalId===a.id&&(h.type==='Hastalık'||h.type==='Tedavi')&&n>=0&&n<=7});
+};
+var FLT={
+  'Hepsi':active,
+  'İnek':function(a){return active(a)&&(a.status==='Sağmal'||a.status==='Kuru')},
+  'Sağmal':function(a){return active(a)&&a.status==='Sağmal'},
+  'Kuru':function(a){return active(a)&&a.status==='Kuru'},
+  'Düve':function(a){return active(a)&&a.status==='Düve'},
+  'Buzağı':function(a){return active(a)&&a.status==='Buzağı'},
+  'Boğa':function(a){return active(a)&&BULLS.indexOf(a.status)>=0},
+  'Gebe':function(a){var p=preg(a);return !!p&&p.confirmed},
+  'Tohumlu':function(a){var p=preg(a);return !!p&&!p.confirmed},
+  'Boş':function(a){return active(a)&&canBreed(a)&&!preg(a)},
+  'Taze':function(a){var lb=lastBirth(a.id);return active(a)&&a.status==='Sağmal'&&!!lb&&diff(today(),lb)<=21},
+  'Hasta':isSick,
+  'Çıkanlar':function(a){return !active(a)}
+};
+function statusLine(a){
+  if(a.exitDate) return {t:(a.exitType||'Sürüden çıktı')+' · '+dshort(a.exitDate),tone:'bad'};
+  var t=today(), p=preg(a), w=withdrawal(a);
+  if(w) return {t:'Süt verilmez, '+w.left+' gün kaldı',tone:'bad'};
+  if(p){
+    if(p.confirmed){
+      if(p.left<0) return {t:'('+p.day+'. gün) Hesaplanan doğum zamanı '+(-p.left)+' gün geçti, veterinerinize danışın',tone:'bad'};
+      if(a.status==='Sağmal'&&diff(p.dry,t)<=0) return {t:'Kuruya çıkarma zamanı geldi',tone:'warn'};
+      if(p.left<=14) return {t:'('+p.day+'. gün) Doğum yaklaşıyor: '+mdur(p.left)+' kaldı',tone:'warn'};
+      return {t:'Doğuma kalan tahmini süre: '+mdur(p.left),tone:'ok'};
+    }
+    if(p.day>=30) return {t:'('+p.day+'. gün) Gebelik kontrolü yapılabilir',tone:'warn'};
+    var hd=diff(p.heat,t);
+    if(hd>=-2&&hd<=3) return {t:'Kızgınlık belirtilerini kontrol edin',tone:'warn'};
+    return {t:'Tohumlandı · '+p.day+'. gün',tone:''};
+  }
+  var nh=nextHeat(a);
+  if(nh&&Math.abs(diff(nh,t))<=2) return {t:'Kızgınlık bekleniyor ('+dshort(nh)+')',tone:'warn'};
+  var lb=lastBirth(a.id);
+  if(a.status==='Sağmal'&&lb&&diff(t,lb)>=PPW&&!state.ins.some(function(i){return i.animalId===a.id&&i.date>lb}))
+    return {t:'Doğumdan '+diff(t,lb)+' gün geçti, tohumlanmadı',tone:'warn'};
+  if(a.status==='Buzağı'&&a.birth&&diff(t,a.birth)>=180) return {t:'6 aylık oldu, durumunu Düve ya da Tosun yap',tone:'warn'};
+  return null;
+}
+function statusIcons(a){
+  if(a.exitDate) return [{n:'exit',l:'Sürüden çıktı',c:'bad'}];
+  var o=[], p=preg(a), w=withdrawal(a), nh=nextHeat(a);
+  if(a.status==='Sağmal') o.push({n:'milk',l:'Sağmal',c:'ok'});
+  if(a.status==='Kuru') o.push({n:'dry',l:'Kuruda',c:''});
+  if(p) o.push(p.confirmed?{n:'preg',l:'Gebe',c:'ok'}:{n:'syringe',l:'Tohumlu, sonuç bekleniyor',c:'warn'});
+  if(isSick(a)) o.push({n:'cross',l:'Hasta, tedavide',c:'bad'});
+  if(w) o.push({n:'ban',l:'Süt verilmez',c:'bad'});
+  if(nh&&Math.abs(diff(nh,today()))<=2) o.push({n:'flame',l:'Kızgınlık bekleniyor',c:'warn'});
+  var lbT=lastBirth(a.id), fresh=a.status==='Sağmal'&&lbT&&diff(today(),lbT)<=21; if(fresh) o.push({n:'star',l:'Taze (Yeni doğuran)',c:'ok'});
+  if(canBreed(a)&&!p&&!fresh) o.push({n:'hourglass',l:'Boş, tohumlama bekliyor',c:''});
+  return o.slice(0,4);
+}
+function iconLegend(){
+  var L=[['milk','Sağmal'],['dry','Kuruda'],['preg','Gebe'],['syringe','Tohumlu, sonuç bekleniyor'],['cross','Hasta, tedavide'],['ban','Süt verilmez'],['flame','Kızgınlık bekleniyor'],['star','Taze (Yeni doğuran)'],['hourglass','Boş, tohumlama bekliyor'],['exit','Sürüden çıktı'],['h:Boğa','Boğa'],['h:Tosun','Tosun (genç erkek)'],['h:Düve','Düve (doğurmamış dişi)'],['h:Buzağı','Buzağı (yavru)']];
+  return '<details class="legend"><summary>Simgeler ne demek?</summary><div class="lg">'+L.map(function(x){return '<span class="lgi"><span class="si">'+ic(x[0])+'</span>'+x[1]+'</span>'}).join('')+'</div></details>';
+}
+var evDesc=function(k){return {birth:'Doğum belirtilerini gözleyin.',check:'Tohumlamadan 30 gün geçti, gebelik kontrolünü yaptırın.',heat:'Tohumlamadan '+CYCLE+' gün geçti, kızgınlık belirtilerini kontrol edin.',heat2:'Kızgınlık belirtilerini gözleyin.',dry:'Doğuma '+DRY+' gün kaldı, kuruya çıkarma zamanı.',wd:'Bu günden sonra süt tanka verilebilir.',grow:'Dişiyse Düve, erkekse Tosun yapın (hayvan sayfasından Düzenle).',open:'Doğumdan bu yana '+PPW+' gün geçti, henüz tohumlanmadı.'}[k]||''};
+
+/* ---------- görünümler ---------- */
+function evRow(e){
+  var big=e.left===0?'Bugün':Math.abs(e.left), unit=e.left===0?'':(e.left<0?'gün gecikti':'gün');
+  return '<a class="ev" href="#a-'+e.a.id+'"><div class="evn '+e.tone+'"><b>'+big+'</b><small>'+unit+'</small></div><div class="evb"><div class="evt">'+esc(e.title)+'</div>'+((e.desc||evDesc(e.kind))?'<div class="evd">'+esc(e.desc||evDesc(e.kind))+'</div>':'')+'<div class="evs">'+eartag(e.a)+' <span>'+esc(e.a.name||'')+'</span> <span>· '+dshort(e.d)+'</span></div></div></a>';
+}
+function viewToday(){
+  var A=state.animals.filter(active),t=today();
+  if(!A.length) return '<div class="empty"><h2 style="margin:0">Defter boş</h2><p>İlk hayvanı ekleyerek başla. Küpe numarası ya da isim yeterli, gerisini sonra doldurabilirsin.</p><button class="btn primary" data-act="addAnimal">Hayvan ekle</button></div>';
+  var pr=A.map(function(a){return {a:a,p:preg(a)}}).filter(function(x){return x.p}).sort(function(x,y){return x.p.left-y.p.left});
+  var ev=buildEvents(), ld=null;
+  DT.forEach(function(v,d){if(d<=t&&(!ld||d>ld.d))ld={d:d,v:v}});
+  var cnt=function(k){return state.animals.filter(FLT[k]).length};
+  var sumT=function(k,label,icn){return '<button class="sum" data-act="goFilter" data-v="'+k+'"><span class="sumi">'+ic(icn)+'</span><b>'+cnt(k)+'</b><span class="sl">'+label+'</span></button>'};
+  var sumH='<h2>Durum özeti</h2><div class="sums">'+sumT('Gebe','Gebe','preg')+sumT('Sağmal','Sağmal','milk')+sumT('Kuru','Kuruda','dry')+sumT('Hasta','Hasta','cross')+sumT('Tohumlu','Tohumlu','syringe')+sumT('Taze','Taze','star')+sumT('Boş','Boş','hourglass')+'<a class="sum" href="#sut"><span class="sumi">'+ic('milk')+'</span><b>'+(ld?fmtN(ld.v,0):'—')+'</b><span class="sl">'+(ld?'litre · '+relDay(ld.d):'litre')+'</span></a></div>';
+  sumH+='<h2>Hayvan sayıları</h2><div class="sums five">'+sumT('Hepsi','Toplam','h:Sürü')+sumT('İnek','İnek','h:Sağmal')+sumT('Düve','Düve','h:Düve')+sumT('Buzağı','Buzağı','h:Buzağı')+sumT('Boğa','Boğa','h:Boğa')+'</div>';
+  var nx=state.animals.filter(function(a){return !active(a)}).length;
+  if(nx) sumH+='<p style="margin:10px 0 0"><button class="btn small" data-act="goFilter" data-v="Çıkanlar">Sürüden çıkanlar: '+nx+'</button></p>';
+  var h='';
+  h+='<div class="tiles"><a class="tile" href="#sut"><span class="ti">'+ic('milk')+'</span>Süt gir</a><button class="tile" data-act="addIns"><span class="ti">'+ic('syringe')+'</span>Tohumlama</button><button class="tile" data-act="addBirth"><span class="ti">'+ic('heart')+'</span>Doğum</button><button class="tile" data-act="addHeat"><span class="ti">'+ic('flame')+'</span>Kızgınlık</button><button class="tile" data-act="addHealth"><span class="ti">'+ic('cross')+'</span>Sağlık kaydı</button><button class="tile" data-act="addAnimal"><span class="ti">'+ic('plus')+'</span>Hayvan ekle</button></div>';
+  h+='<h2>Yaklaşan olaylar</h2>'+(ev.length?ev.map(evRow).join(''):'<p class="muted">Önümüzdeki günlerde bekleyen olay yok.</p>');
+  h+=sumH;
+  h+='<h2>Gebelik sayacı</h2>';
+  h+=pr.length?pr.map(function(x){
+    var a=x.a,p=x.p,pct=Math.max(2,Math.min(100,p.day/p.gest*100));
+    return '<a class="pg" href="#a-'+a.id+'"><div class="l1"><span class="arow">'+eartag(a)+'<b>'+esc(a.name||'')+'</b></span>'+(p.confirmed?chip('Kesin gebe','ok'):chip('Kontrol bekliyor','warn'))+'</div><div class="track"><i style="width:'+pct.toFixed(1)+'%"></i></div><div class="l2"><span>'+p.day+'. gün · '+(p.left<0?mdur(p.left)+' gecikti':mdur(p.left)+' kaldı')+'</span><span>'+dshort(p.exp)+'</span></div></a>';
+  }).join(''):'<p class="muted">Gebe hayvan yok. Tohumlama kaydettiğinde sayaç burada başlar.</p>';
+  return h;
+}
+function viewAnimals(){
+  var A=state.animals.slice().sort(byName);
+  if(!FLT[filterV]) filterV='Hepsi';
+  var CH=['Hepsi','İnek','Sağmal','Kuru','Gebe','Düve','Buzağı','Boğa','Çıkanlar'], ks=CH.indexOf(filterV)<0?CH.concat([filterV]):CH;
+  var h='<div class="chips">'+ks.map(function(k){return '<button data-act="filter" data-v="'+k+'" aria-pressed="'+(filterV===k)+'">'+k+' '+A.filter(FLT[k]).length+'</button>'}).join('')+'</div>';
+  var L=A.filter(FLT[filterV]);
+  if(!A.length) return '<div class="empty"><h2 style="margin:0">Hayvan yok</h2><p>İlk hayvanı ekle.</p><button class="btn primary" data-act="addAnimal">Hayvan ekle</button></div>';
+  h+=L.length?L.map(function(a){
+    var av=avgOf(series(7,a.id)), w=withdrawal(a);
+    var sl=statusLine(a);
+    return '<a class="acard" href="#a-'+a.id+'">'+avatar(a)+'<div class="abody"><div class="aname">'+esc(a.name||'İsimsiz')+'</div><div class="arow">'+eartag(a)+chip(a.status||'—')+(a.pen?chip(a.pen):'')+'</div>'+(sl?'<div class="sline '+sl.tone+'">'+esc(sl.t)+'</div>':'')+(av!=null?'<div class="ameta">Son 7 gün: '+fmtN(av)+' L/gün</div>':'')+'</div><div class="sicons">'+statusIcons(a).map(function(i){return '<span class="si '+i.c+'" role="img" aria-label="'+i.l+'" title="'+i.l+'">'+ic(i.n)+'</span>'}).join('')+'</div></a>';
+  }).join(''):'<p class="muted">Bu filtreye uyan hayvan yok.</p>';
+  return h+'<div class="row-actions"><button class="btn primary" data-act="addAnimal">Hayvan ekle</button></div>'+iconLegend();
+}
+function viewAnimal(id){
+  var a=byId(id);
+  if(!a) return '<p class="muted">Hayvan bulunamadı.</p><a class="btn" href="#hayvanlar">Listeye dön</a>';
+  var p=preg(a),w=withdrawal(a),mother=byId(a.motherId),male=['Boğa','Tosun'].indexOf(a.status)>=0||(a.status==='Buzağı'&&a.sex==='Erkek'),calves=state.animals.filter(function(x){return male?(x.sireId===a.id||(!x.sireId&&norm(x.sire)&&(norm(x.sire)===norm(a.name)||norm(x.sire)===norm(a.tag)))):x.motherId===a.id});
+  var desc=function(x,y){return y.date.localeCompare(x.date)};
+  var ins=state.ins.filter(function(i){return i.animalId===id}).sort(desc);
+  var births=state.births.filter(function(b){return b.animalId===id}).sort(desc);
+  var hl=state.health.filter(function(x){return x.animalId===id}).sort(desc);
+  var phs=state.photos.filter(function(x){return x.animalId===id});
+  var lb=lastBirth(id), ser=series(45,id), av=avgOf(series(7,id));
+  var breed=canBreed(a)&&active(a), showMilk=a.status==='Sağmal'||ser.some(function(s){return s.v}), showIns=breed||ins.length>0, showBirths=a.status==='Sağmal'||a.status==='Kuru'||births.length>0;
+  var h='<p><a href="#hayvanlar" class="muted" style="text-decoration:none">← Hayvanlar</a></p>';
+  h+='<div class="dhead"><button class="avatar big" data-act="photoAdd" aria-label="Fotoğraf ekle">'+(a.thumb?'<img src="'+a.thumb+'" alt="">':headOf(a))+'</button><div><h2>'+esc(a.name||'İsimsiz')+'</h2><div class="arow">'+eartag(a)+chip(a.status||'—')+(a.birth?chip(age(a.birth)):'')+'</div></div></div>';
+  if(a.exitDate) h+='<div class="banner" style="margin-top:14px"><b>'+esc(a.exitType||'Sürüden çıktı')+'</b> · '+dlong(a.exitDate)+(a.exitPrice?' · '+fmtN(a.exitPrice,0)+' ₺':'')+(a.exitNote?'<br>'+esc(a.exitNote):'')+'</div>';
+  if(w) h+='<div class="banner" style="margin-top:14px"><b>Süt verilmez.</b> '+esc(w.what)+' nedeniyle '+dlong(w.until)+' tarihine kadar ('+w.left+' gün) sütü tanka karıştırma.</div>';
+  if(p&&p.confirmed&&p.left<0) h+='<div class="banner bad" style="margin-top:14px"><b>Hesaplanan doğum zamanı '+(-p.left)+' gün geçti.</b> Veterinerinize danışın.</div>';
+  if(breed) h+='<h2>Gebelik</h2><div class="card">';
+  if(!breed){
+  }else if(p){
+    var pct=Math.max(2,Math.min(100,p.day/p.gest*100));
+    h+='<div class="pbig"><div class="d"><b>'+p.day+'</b><span>. gün</span></div><div class="r"><b class="'+(p.left<0?'bad':'')+'">'+(p.left<0?mdur(p.left)+' gecikti':mdur(p.left)+' kaldı')+'</b><span>Tahmini doğum '+dlong(p.exp)+'</span><span>Gebelik süresi '+p.gest+' gün</span></div></div><div class="track"><i style="width:'+pct.toFixed(1)+'%"></i></div>';
+    h+='<dl class="kv"><dt>Tohumlama</dt><dd>'+dshort(p.ins.date)+(p.ins.sire?' · '+esc(p.ins.sire):'')+'</dd><dt>Gebelik kontrolü (30. gün)</dt><dd>'+dshort(p.check)+(p.confirmed?' · yapıldı':'')+'</dd>'+(p.confirmed?'':'<dt>Tekrar kızgınlık (21. gün)</dt><dd>'+dshort(p.heat)+'</dd>')+'<dt>Kuruya çıkarma</dt><dd>'+dshort(p.dry)+(a.status==='Kuru'?' · yapıldı':'')+'</dd></dl>';
+    h+='<div class="row-actions">'+(p.confirmed?'':'<button class="btn small" data-act="insResult" data-id="'+p.ins.id+'" data-v="gebe">Gebe çıktı</button><button class="btn small" data-act="insResult" data-id="'+p.ins.id+'" data-v="bos">Boş çıktı</button>')+(a.status==='Sağmal'?'<button class="btn small" data-act="setDry" data-id="'+id+'">Kuruya çıkarıldı</button>':'')+'<button class="btn small primary" data-act="addBirth" data-id="'+id+'">Doğum kaydet</button></div>';
+  }else if(a.exitDate){
+    h+='<p class="muted" style="margin:0">Sürüden çıktığı için gebelik takibi kapalı.</p>';
+  }else{
+    h+='<p class="muted" style="margin:0 0 4px">Şu an gebe değil.'+(lb?' Son doğum '+dlong(lb)+'.':'')+'</p><div class="row-actions"><button class="btn small primary" data-act="addIns" data-id="'+id+'">Tohumlama kaydet</button></div>';
+  }
+  if(breed) h+='</div>';
+  if(showMilk) h+='<h2>Süt</h2><div class="card"><div class="total"><div><b>'+(av!=null?fmtN(av):'—')+'</b> <span class="muted">L/gün, son 7 gün</span></div>'+(lb&&a.status==='Sağmal'?'<span class="muted">Laktasyonun '+diff(today(),lb)+'. günü</span>':'')+'</div><div style="margin-top:10px">'+chart(ser,'Son 45 gün süt verimi')+'</div></div>';
+  var hts=state.heats.filter(function(x){return x.animalId===id}).sort(desc), lh=lastHeat(a), nh=nextHeat(a);
+  if((breed&&!(p&&p.confirmed))||hts.length) h+='<div class="card"><div class="hd"><h3>Kızgınlık</h3>'+(breed?'<button class="btn small primary" data-act="addHeat" data-id="'+id+'">Kızgınlık kaydet</button>':'')+'</div>'+
+    (lh?'<dl class="kv" style="margin:0 0 8px"><dt>Son kızgınlık</dt><dd>'+dlong(lh)+' ('+diff(today(),lh)+' gün önce)</dd>'+(nh?'<dt>Beklenen sonraki ('+CYCLE+' gün)</dt><dd>'+dlong(nh)+'</dd>':'')+'</dl>':'<p class="muted" style="margin:0 0 8px">Kızgınlık kaydı yok.</p>')+
+    '</div>';
+  var tl=[];
+  state.ins.forEach(function(i){if(i.animalId===id)tl.push({d:i.date,i:'syringe',t:'Tohumlama yapıldı',s:[i.method,i.sire,i.by].filter(Boolean).join(' · '),c:chip(RESULT[i.result]||'—',i.result==='gebe'?'ok':i.result==='bos'?'bad':'warn'),act:'editIns',id:i.id})});
+  state.heats.forEach(function(x){if(x.animalId===id)tl.push({d:x.date,i:'flame',t:'Kızgınlık görüldü',s:x.note||'',act:'editHeat',id:x.id})});
+  state.births.forEach(function(b){if(b.animalId===id)tl.push({d:b.date,i:'heart',t:b.outcome==='olu'?'Ölü doğum':'Doğum yaptı',s:b.outcome==='olu'?'':[b.calfName,b.calfTag].filter(Boolean).join(' · ')+(b.sex?' · '+b.sex:'')+(b.weight?' · '+fmtN(b.weight)+' kg':''),href:(b.calfId&&byId(b.calfId))?'#a-'+b.calfId:''})});
+  state.health.forEach(function(x){if(x.animalId===id)tl.push({d:x.date,i:'cross',t:x.type,s:x.note||'',c:x.wd>0?chip('Bekleme '+x.wd+' gün','bad'):'',act:'editHealth',id:x.id})});
+  if(a.dryDate) tl.push({d:a.dryDate,i:'dry',t:'Kuruya alındı',s:''});
+  if(a.birth) tl.push({d:a.birth,i:'star',t:'Doğdu',s:''});
+  if(a.exitDate) tl.push({d:a.exitDate,i:'exit',t:a.exitType||'Sürüden çıktı',s:a.exitNote||''});
+  tl.sort(function(x,y){return y.d.localeCompare(x.d)});
+  h+='<div class="card"><div class="hd"><h3>Geçmiş</h3>'+(active(a)?'<button class="btn small" data-act="addHealth" data-id="'+id+'">Sağlık ekle</button>':'')+'</div>'+(tl.length?'<div class="list">'+tl.map(function(e){
+    var p3=e.d.split('-'), body='<span class="tdate"><b>'+(+p3[2])+'</b><small>'+MON[+p3[1]-1]+' '+p3[0].slice(2)+'</small></span><span class="ticon">'+ic(e.i)+'</span><span class="a"><b>'+esc(e.t)+'</b>'+(e.s?'<small>'+esc(e.s)+'</small>':'')+'</span>'+(e.c||'');
+    if(e.act) return '<button class="li tl" data-act="'+e.act+'" data-id="'+e.id+'">'+body+'</button>';
+    if(e.href) return '<a class="li tl" href="'+e.href+'" style="text-decoration:none">'+body+'</a>';
+    return '<div class="li tl">'+body+'</div>';
+  }).join('')+'</div>':'<p class="muted" style="margin:0">Henüz kayıt yok.</p>')+'</div>';
+
+
+  if(active(a)){
+    var rn=rationFor(a), nd=animalNeed(a);
+    h+='<div class="card"><div class="hd"><h3>Günlük yem</h3><button class="btn small" data-act="addRation" data-v="animal" data-id="'+id+'">'+(rn.own?'Kalem ekle':'Özel rasyon')+'</button></div>';
+    if(nd.length){
+      h+='<div class="list">'+nd.map(function(x,i){var r=rn.items[i];return (rn.own?'<button class="li" data-act="editRation" data-id="'+r.id+'">':'<div class="li">')+'<span class="a"><b>'+esc(x.item)+'</b></span><b>'+fmtN(x.kg)+' kg</b>'+(rn.own?'</button>':'</div>')}).join('')+'</div><p class="muted" style="margin:10px 0 0">Toplam '+fmtN(sum(nd,function(x){return x.kg}))+' kg/gün. '+(rn.own?'Özel rasyon kullanılıyor, grup rasyonu geçerli değil.':'Grup rasyonu ('+esc(a.status)+') kullanılıyor.')+'</p>';
+      if(rn.own) h+='<div class="row-actions"><button class="btn small" data-act="clearOwn" data-id="'+id+'">Grup rasyonuna dön</button></div>';
+    }else h+='<p class="muted" style="margin:0">Rasyon tanımlı değil. Yem sekmesinden grup rasyonu gir ya da özel rasyon ekle.</p>';
+    h+='</div>';
+  }
+  h+='<div class="card"><div class="hd"><h3>Temel bilgiler</h3></div><dl class="kv" style="margin:0"><dt>Küpe no</dt><dd>'+esc(a.tag)+'</dd><dt>Cinsiyet</dt><dd>'+(male?'Erkek':'Dişi')+'</dd>'+(a.breed?'<dt>Irk</dt><dd>'+esc(a.breed)+'</dd>':'')+(a.birth?'<dt>Doğum tarihi</dt><dd>'+dlong(a.birth)+' · '+esc(age(a.birth))+'</dd>':'')+(a.pen?'<dt>Padok / grup</dt><dd>'+esc(a.pen)+'</dd>':'')+'<dt>Anaç</dt><dd>'+(mother?'<a href="#a-'+mother.id+'">'+esc(mother.name||mother.tag)+'</a>':'—')+'</dd><dt>Güve (baba)</dt><dd>'+(a.sireId&&byId(a.sireId)?'<a href="#a-'+a.sireId+'">'+esc(byId(a.sireId).name||byId(a.sireId).tag)+'</a>':esc(a.sire||'—'))+'</dd><dt>'+(male?'Yavruları':'Buzağıları')+'</dt><dd>'+(calves.length?calves.map(function(c){return '<a href="#a-'+c.id+'">'+esc(c.name||c.tag)+'</a>'}).join(', '):'—')+'</dd></dl></div>';
+  h+='<div class="card"><div class="hd"><h3>Fotoğraflar</h3><button class="btn small" data-act="photoAdd">Fotoğraf ekle</button></div>'+(phs.length?'<div class="grid-ph">'+phs.map(function(x){return '<button data-act="photoOpen" data-id="'+x.id+'" aria-label="Fotoğraf '+dshort(x.date)+'"><img src="'+x.data+'" alt=""></button>'}).join('')+'</div>':'<p class="muted" style="margin:0">Fotoğraf yok.</p>')+'</div>';
+  if(a.note) h+='<div class="card"><h3>Not</h3><div>'+esc(a.note)+'</div></div>';
+  h+='<div class="row-actions"><button class="btn" data-act="editAnimal" data-id="'+id+'">Bilgileri düzenle</button>'+(a.exitDate?'<button class="btn" data-act="reinstate" data-id="'+id+'">Sürüye geri al</button>':'<button class="btn danger" data-act="exitAnimal" data-id="'+id+'">Sürüden çıkar</button>')+'</div>';
+  return h;
+}
+function dimCard(){
+  var R=state.animals.filter(function(a){return active(a)&&a.status==='Sağmal'}).map(function(a){
+    var lb=lastBirth(a.id);return {a:a,dim:lb?diff(today(),lb):null,av:avgOf(series(7,a.id))};
+  }).sort(function(x,y){return (y.dim==null?-1:y.dim)-(x.dim==null?-1:x.dim)});
+  if(!R.length) return '';
+  var known=R.filter(function(r){return r.dim!=null}), avgD=known.length?sum(known,function(r){return r.dim})/known.length:null;
+  return '<h2>Sağımda geçen gün</h2><div class="card">'+(avgD!=null?'<p class="muted" style="margin:0 0 6px">Sürü ortalaması '+fmtN(avgD,0)+'. gün ('+known.length+' hayvan)</p>':'')+'<div class="list">'+R.map(function(r){
+    var p=preg(r.a), soon=p&&p.confirmed&&diff(p.dry,today())<=14;
+    return '<a class="li" href="#a-'+r.a.id+'" style="text-decoration:none"><span class="a"><b>'+esc(r.a.name||r.a.tag)+'</b><small>'+(r.av!=null?fmtN(r.av)+' L/gün':'Süt kaydı yok')+(soon?' · kuruya çıkacak':'')+'</small></span>'+(r.dim!=null?'<b>'+r.dim+'. gün</b>':chip('Doğum tarihi yok','warn'))+'</a>';
+  }).join('')+'</div></div>';
+}
+function viewMilk(){
+  var d=milkDate||(milkDate=today());
+  var rows=state.animals.filter(function(a){return (active(a)&&a.status==='Sağmal')||MI.has(a.id+'_'+d)}).sort(byName);
+  var total=DT.get(d)||0, wk=series(7), h='';
+  h+='<div class="card"><div class="total"><div><b id="mTotal">'+fmtN(total)+'</b> <span class="muted">litre</span></div><span class="muted">'+DAYN[new Date(toT(d)).getUTCDay()]+'</span></div>';
+  h+='<div class="dnav"><button class="btn" data-act="milkPrev" aria-label="Önceki gün">‹</button><input type="date" id="milkDate" value="'+d+'" aria-label="Tarih"><button class="btn" data-act="milkNext" aria-label="Sonraki gün">›</button></div></div>';
+  if(!rows.length) return h+'<p class="muted">Sağmal hayvan yok. Hayvan durumunu "Sağmal" yap.</p>';
+  h+='<div class="card"><div class="mhead"><span>Hayvan</span><span style="text-align:center">Sabah (L)</span><span style="text-align:center">Akşam (L)</span></div>';
+  h+=rows.map(function(a){
+    var m=MI.get(a.id+'_'+d)||{}, w=withdrawal(a,d);
+    return '<div class="mrow" data-row="'+a.id+'"><div class="who"><b>'+esc(a.name||'İsimsiz')+'</b><span class="arow">'+eartag(a)+(w?chip('Süt verilmez · '+w.left+' gün','bad'):'')+'</span></div><input class="milk-in" data-p="am" inputmode="decimal" autocomplete="off" aria-label="'+esc(a.name||a.tag)+' sabah" value="'+(m.am!=null?m.am:'')+'"><input class="milk-in" data-p="pm" inputmode="decimal" autocomplete="off" aria-label="'+esc(a.name||a.tag)+' akşam" value="'+(m.pm!=null?m.pm:'')+'"></div>';
+  }).join('')+'</div>';
+  h+='<h2>Sürü toplamı, son 30 gün</h2><div class="card">'+chart(series(30),'Son 30 gün sürü süt toplamı')+'</div>';
+  var avs=rows.map(function(a){return {a:a,v:avgOf(series(7,a.id))}}).filter(function(x){return x.v!=null}).sort(function(x,y){return y.v-x.v});
+  h+=dimCard();
+  if(avs.length) h+='<h2>Hayvan başına, son 7 gün ortalaması</h2><div class="card"><div class="list">'+avs.map(function(x){return '<a class="li" href="#a-'+x.a.id+'" style="text-decoration:none"><span class="a"><b>'+esc(x.a.name||x.a.tag)+'</b></span><b>'+fmtN(x.v)+' L/gün</b></a>'}).join('')+'</div></div>';
+  return h;
+}
+function viewFeedLog(){
+  var t=today(), from=addDays(t,-6);
+  var f7=state.feed.filter(function(x){return x.date>=from&&x.date<=t});
+  var kg=sum(f7,function(x){return x.kg||0}), cost=sum(f7,function(x){return (x.kg||0)*(x.price||0)});
+  var L=sum(series(7),function(x){return x.v||0}), per=(L>0&&cost>0)?cost/L:null;
+  var h='<div class="card"><h3>Litre başına yem maliyeti</h3><div class="big-cost">'+(per!=null?fmtN(per,2)+' ₺':'—')+'</div><p class="muted" style="margin:8px 0 0">Son 7 gün: '+fmtN(kg)+' kg yem, '+fmtN(cost,0)+' ₺, '+fmtN(L)+' L süt.'+(per==null?' Hem yem hem süt kaydı girildiğinde hesaplanır.':'')+'</p></div>';
+  h+='<div class="row-actions" style="margin:0 0 6px"><button class="btn primary" data-act="addFeed">Yem kaydı ekle</button></div>';
+  var list=state.feed.slice().sort(function(x,y){return y.date.localeCompare(x.date)}).slice(0,60);
+  if(!list.length) return h+'<p class="muted">Henüz yem kaydı yok.</p>';
+  var groups={},order=[];
+  list.forEach(function(x){if(!groups[x.date]){groups[x.date]=[];order.push(x.date)}groups[x.date].push(x)});
+  order.forEach(function(d){
+    var g=groups[d];
+    h+='<h2>'+dlong(d)+' · '+fmtN(sum(g,function(x){return x.kg||0}))+' kg</h2><div class="card"><div class="list">'+g.map(function(x){
+      var a=x.animalId?byId(x.animalId):null;
+      return '<button class="li" data-act="editFeed" data-id="'+x.id+'"><span class="a"><b>'+esc(x.item)+'</b><small>'+esc(a?(a.name||a.tag):'Tüm sürü')+'</small></span><span style="text-align:right"><b>'+fmtN(x.kg)+' kg</b><br><small class="muted">'+(x.price?fmtN((x.kg||0)*x.price,0)+' ₺':'')+'</small></span></button>';
+    }).join('')+'</div></div>';
+  });
+  return h;
+}
+var feedTab='plan';
+var kgTxt=function(r){return fmtN(r.kg)+' kg'+(r.perL?' + '+fmtN(r.perL,2)+' kg/L süt':'')};
+function viewFeed(){
+  var tabs=[['plan','Rasyon'],['stok','Stok'],['kayit','Kayıtlar']];
+  var h='<div class="chips">'+tabs.map(function(t){return '<button data-act="feedTab" data-v="'+t[0]+'" aria-pressed="'+(feedTab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
+  return h+(feedTab==='plan'?viewPlan():feedTab==='stok'?viewStock():viewFeedLog());
+}
+function viewPlan(){
+  var A=state.animals.filter(active).sort(byName);
+  if(!A.length) return '<p class="muted">Önce hayvan ekle, sonra rasyonu tanımla.</p>';
+  var need=herdNeed(), keys=Object.keys(need).sort(function(a,b){return need[a].item.localeCompare(need[b].item,'tr')});
+  var h='<div class="card"><h3>Bugünkü toplam ihtiyaç</h3>';
+  if(keys.length){
+    h+='<div class="list">'+keys.map(function(k){return '<div class="li"><span class="a"><b>'+esc(need[k].item)+'</b></span><b>'+fmtN(need[k].kg)+' kg</b></div>'}).join('')+'</div><p class="muted" style="margin:10px 0 0">Toplam '+fmtN(sum(keys,function(k){return need[k].kg}))+' kg/gün, '+keys.length+' çeşit yem, '+A.length+' hayvan.</p><div class="row-actions"><button class="btn primary" data-act="applyPlan">Bugünün yemlemesini kaydet</button></div>';
+  }else h+='<p class="muted" style="margin:0">Henüz rasyon tanımlı değil. Aşağıda her grup için günlük yem kalemlerini gir.</p>';
+  h+='</div>';
+  h+='<p class="muted" style="font-size:13px">Miktarlar ırka, canlı ağırlığa, süt verimine ve kaba yem kalitesine göre değişir. Değerleri veteriner ya da yem danışmanınla belirle, uygulama toplamı, stoğu ve maliyeti hesaplar. Sağmal hayvanlarda "süt başına ek" alanı, son 7 günlük süt ortalamasına göre kesif yemi otomatik ayarlar.</p>';
+  h+='<h2>Gruplara göre rasyon (kg/baş/gün)</h2>';
+  STATUSES.filter(function(s){return A.some(function(a){return a.status===s})}).forEach(function(s){
+    var n=A.filter(function(a){return a.status===s}).length, it=state.rations.filter(function(r){return r.scope==='status'&&r.key===s});
+    h+='<div class="card"><div class="hd"><h3>'+esc(s)+' · '+n+' hayvan</h3><button class="btn small" data-act="addRation" data-v="status" data-id="'+esc(s)+'">Kalem ekle</button></div>'+(it.length?'<div class="list">'+it.map(function(r){return '<button class="li" data-act="editRation" data-id="'+r.id+'"><span class="a"><b>'+esc(r.item)+'</b></span><span>'+kgTxt(r)+'</span></button>'}).join('')+'</div>':'<p class="muted" style="margin:0">Rasyon yok.</p>')+'</div>';
+  });
+  h+='<h2>Hayvan başına günlük yem</h2><div class="card"><div class="list">'+A.map(function(a){
+    var nd=animalNeed(a), own=rationFor(a).own;
+    return '<a class="li" href="#a-'+a.id+'" style="text-decoration:none"><span class="a"><b>'+esc(a.name||'İsimsiz')+'</b><small>'+esc(a.status||'')+(own?' · özel rasyon':'')+'</small></span><b>'+(nd.length?fmtN(sum(nd,function(x){return x.kg}))+' kg':'—')+'</b></a>';
+  }).join('')+'</div></div>';
+  return h;
+}
+function viewStock(){
+  var rows=stockTable(), td=settings().targetDays, h='';
+  h+='<div class="chips">'+[15,30,45,60,90].map(function(d){return '<button data-act="setTarget" data-v="'+d+'" aria-pressed="'+(td===d)+'">'+d+' gün</button>'}).join('')+'</div>';
+  var buyKg=0,buyCost=0;
+  var body=rows.map(function(r){
+    var days=r.need>0?Math.floor(Math.max(0,r.stock)/r.need):null, toBuy=Math.max(0,r.need*td-r.stock), pr=lastPrice(r.item)||0;
+    buyKg+=toBuy; buyCost+=toBuy*pr;
+    var c=days==null?'':days<7?chip(days+' gün','bad'):days<td?chip(days+' gün','warn'):chip(days+' gün','ok');
+    return '<div class="li"><span class="a"><b>'+esc(r.item)+'</b><small>'+(r.need>0?'Günlük '+fmtN(r.need)+' kg':'Rasyonda yok')+(toBuy>0?' · '+td+' güne '+fmtN(toBuy,0)+' kg eksik':'')+'</small></span><span style="text-align:right;display:grid;gap:4px;justify-items:end"><b>'+fmtN(r.stock,0)+' kg</b>'+c+'</span></div>';
+  }).join('');
+  h+='<div class="card"><h3>Stok durumu</h3>'+(rows.length?'<div class="list">'+body+'</div><p class="muted" style="margin:10px 0 0">'+rows.length+' çeşit yem. '+td+' günlük hedef için toplam '+fmtN(buyKg,0)+' kg alım gerekiyor'+(buyCost>0?' (yaklaşık '+fmtN(buyCost,0)+' ₺)':'')+'.</p>':'<p class="muted" style="margin:0">Henüz stok girişi yok. Elindeki yemi ve aldığın yemleri gir.</p>')+'<div class="row-actions"><button class="btn primary" data-act="addStock">Stok girişi</button></div></div>';
+  h+='<p class="muted" style="font-size:13px">Stok, girdiğin alımlardan "Kayıtlar"daki yemleme miktarları düşülerek hesaplanır. İlk girişte elindeki mevcut yemi de ekle. Sayım farkını eksi (-) miktarla düzeltebilirsin.</p>';
+  var list=state.stock.slice().sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,20);
+  if(list.length) h+='<h2>Son stok girişleri</h2><div class="card"><div class="list">'+list.map(function(x){return '<button class="li" data-act="editStock" data-id="'+x.id+'"><span class="a"><b>'+esc(x.item)+'</b><small>'+dlong(x.date)+(x.note?' · '+esc(x.note):'')+'</small></span><span style="text-align:right"><b>'+(x.kg>0?'+':'')+fmtN(x.kg,0)+' kg</b>'+(x.price?'<br><small class="muted">'+fmtN(x.price,2)+' ₺/kg</small>':'')+'</span></button>'}).join('')+'</div></div>';
+  return h;
+}
+var repPeriod='ay';
+var tr=function(n){return n==null?'':String(n).replace('.',',')};
+function csvCell(v){v=v==null?'':String(v);return /[;"\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+async function saveCsv(name,rows){
+  if(!dlCap){toast('Bu görünümde dosya indirme kapalı.');return}
+  try{await dlCap.save({filename:name,data:'﻿'+rows.map(function(r){return r.map(csvCell).join(';')}).join('\r\n')});toast('Dosya hazır.')}
+  catch(e){if(!e||e.code!=='declined')toast(errText(e))}
+}
+function csvAnimals(){
+  var rows=[['Küpe no','İsim','Durum','Cinsiyet','Irk','Padok / grup','Doğum tarihi','Anne','Baba','Son doğum','Gebelik','Beklenen doğum','Çıkış tarihi','Çıkış nedeni','Satış bedeli (TL)']];
+  state.animals.slice().sort(byName).forEach(function(a){
+    var p=preg(a), m=byId(a.motherId), male=BULLS.indexOf(a.status)>=0||(a.status==='Buzağı'&&a.sex==='Erkek');
+    rows.push([a.tag,a.name,a.status,male?'Erkek':'Dişi',a.breed,a.pen,a.birth,m?(m.name||m.tag):'',a.sire,lastBirth(a.id),p?(p.confirmed?'Gebe':'Tohumlu'):'',p?p.exp:'',a.exitDate,a.exitType,tr(a.exitPrice)]);
+  });
+  return saveCsv('hayvan-listesi-'+today()+'.csv',rows);
+}
+function periodFrom(){var t=today();return repPeriod==='ay'?t.slice(0,8)+'01':repPeriod==='3ay'?addDays(t,-90):addDays(t,-365)}
+function csvMilk(){
+  var from=periodFrom(), t=today(), rows=[['Tarih','Küpe no','İsim','Sabah (L)','Akşam (L)','Toplam (L)']];
+  state.milk.filter(function(m){return m.date>=from&&m.date<=t}).sort(function(x,y){return x.date.localeCompare(y.date)}).forEach(function(m){
+    var a=byId(m.animalId); rows.push([m.date,a?a.tag:'',a?a.name:'',tr(m.am),tr(m.pm),tr((m.am||0)+(m.pm||0))]);
+  });
+  return saveCsv('sut-kayitlari-'+from+'_'+t+'.csv',rows);
+}
+var MCATS=['Süt satışı','Hayvan satışı','Veteriner ve ilaç','İşçilik','Yakıt ve elektrik','Bakım onarım','Diğer'];
+function moneyCard(from,to){
+  var inR=function(d){return !!d&&d>=from&&d<=to}, inc={}, exp={};
+  var add=function(o,k,v){o[k]=(o[k]||0)+v};
+  state.money.forEach(function(m){if(inR(m.date)) add(m.type==='Gelir'?inc:exp,m.cat||'Diğer',m.amount||0)});
+  state.animals.forEach(function(a){if(a.exitType==='Satıldı'&&a.exitPrice>0&&inR(a.exitDate)) add(inc,'Hayvan satışı',a.exitPrice)});
+  state.stock.forEach(function(s){if(s.kg>0&&s.price>0&&inR(s.date)) add(exp,'Yem alımı',s.kg*s.price)});
+  var sm=function(o){return sum(Object.keys(o),function(k){return o[k]})}, ti=sm(inc), te=sm(exp), net=ti-te;
+  var lines=function(o,cls){return Object.keys(o).sort(function(x,y){return o[y]-o[x]}).map(function(k){return '<dt>'+esc(k)+'</dt><dd class="'+cls+'">'+fmtN(o[k],0)+' ₺</dd>'}).join('')};
+  var ent=state.money.filter(function(m){return inR(m.date)}).sort(function(x,y){return y.date.localeCompare(x.date)}).slice(0,8);
+  var h='<div class="card"><div class="hd"><h3>Gelir / gider</h3><button class="btn small primary" data-act="addMoney">Ekle</button></div>';
+  h+='<div class="mgrid"><div><span class="muted">Gelir</span><b class="gain">'+fmtN(ti,0)+' ₺</b></div><div><span class="muted">Gider</span><b class="loss">'+fmtN(te,0)+' ₺</b></div><div><span class="muted">Fark</span><b class="'+(net<0?'loss':'gain')+'">'+fmtN(net,0)+' ₺</b></div></div>';
+  h+=(ti||te)?'<dl class="kv" style="margin:0">'+lines(inc,'gain')+lines(exp,'loss')+'</dl>':'<p class="muted" style="margin:0">Bu dönemde gelir ya da gider kaydı yok.</p>';
+  if(ent.length) h+='<div class="list" style="margin-top:10px">'+ent.map(function(m){return '<button class="li" data-act="editMoney" data-id="'+m.id+'"><span class="a"><b>'+esc(m.cat||'Diğer')+'</b><small>'+dlong(m.date)+(m.note?' · '+esc(m.note):'')+'</small></span><b class="'+(m.type==='Gelir'?'gain':'loss')+'">'+(m.type==='Gelir'?'+':'−')+fmtN(m.amount||0,0)+' ₺</b></button>'}).join('')+'</div>';
+  h+='<p class="muted" style="font-size:13px;margin:10px 0 0">Satılan hayvanların bedeli ve yem stok alımları otomatik hesaplanır, ayrıca girme.</p></div>';
+  return h;
+}
+function formMoney(id){
+  var ex=id?state.money.find(function(x){return x.id===id}):null;
+  openSheet({title:ex?'Kaydı düzenle':'Gelir / gider ekle',fields:[
+    {name:'type',label:'Tür',type:'select',options:['Gelir','Gider'],value:(ex&&ex.type)||'Gelir'},
+    {name:'date',label:'Tarih',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'cat',label:'Kalem',value:ex&&ex.cat,list:MCATS,required:true,ph:'Örn. Süt satışı'},
+    {name:'amount',label:'Tutar (₺)',type:'number',value:ex&&ex.amount,required:true},
+    {name:'note',label:'Not',value:ex&&ex.note}
+  ],onSubmit:function(v){if(!(v.amount>0)) throw new Error('Tutar sıfırdan büyük olmalı.');return put('money',Object.assign({},ex||{},v))},
+  onDelete:ex?function(){return del('money',ex.id)}:null});
+}
+function viewReport(){
+  var from=periodFrom(), t=today();
+  var inR=function(d){return !!d&&d>=from&&d<=t};
+  var sick=function(x){return x.type==='Hastalık'||x.type==='Tedavi'};
+  var rows=[
+    {l:'Tohumlama yapıldı',i:'syringe',n:state.ins.filter(function(x){return inR(x.date)}).length},
+    {l:'Kızgınlık görüldü',i:'flame',n:state.heats.filter(function(x){return inR(x.date)}).length},
+    {l:'Doğum yaptı',i:'heart',n:state.births.filter(function(x){return inR(x.date)}).length},
+    {l:'Kuruya alındı',i:'dry',n:state.animals.filter(function(x){return inR(x.dryDate)}).length},
+    {l:'Hasta, tedavi',i:'cross',n:state.health.filter(function(x){return sick(x)&&inR(x.date)}).length},
+    {l:'Aşı, muayene, diğer',i:'cross',n:state.health.filter(function(x){return !sick(x)&&inR(x.date)}).length},
+    {l:'Sürüden çıkan',i:'exit',n:state.animals.filter(function(x){return inR(x.exitDate)}).length}
+  ];
+  var tot=sum(rows,function(r){return r.n});
+  var h='<div class="chips">'+[['ay','Bu ay'],['3ay','Son 3 ay'],['yil','Son 1 yıl']].map(function(p){return '<button data-act="repPeriod" data-v="'+p[0]+'" aria-pressed="'+(repPeriod===p[0])+'">'+p[1]+'</button>'}).join('')+'</div>';
+  h+='<div class="card"><h3>Durum kayıtları · '+dshort(from)+' – '+dshort(t)+'</h3>'+(tot?rows.map(function(r){var pc=tot?r.n/tot*100:0;return '<div class="rrow"><span class="ri">'+ic(r.i)+'</span><span>'+r.l+'</span><b>'+r.n+'</b><span class="muted pct">%'+fmtN(pc,1)+'</span><div class="rbar"><i style="width:'+pc.toFixed(1)+'%"></i></div></div>'}).join(''):'<p class="muted" style="margin:0">Bu dönemde kayıt yok.</p>')+'</div>';
+  var ml=state.milk.filter(function(m){return inR(m.date)}), lit=sum(ml,function(m){return (m.am||0)+(m.pm||0)}), days=new Set(ml.map(function(m){return m.date})).size;
+  var bs=state.births.filter(function(b){return inR(b.date)}), live=bs.filter(function(b){return b.outcome!=='olu'});
+  var ex=state.animals.filter(function(a){return inR(a.exitDate)}), sold=ex.filter(function(a){return a.exitType==='Satıldı'}), dead=ex.filter(function(a){return a.exitType==='Öldü'});
+  h+='<div class="card"><h3>Özet</h3><dl class="kv" style="margin:0"><dt>Toplam süt</dt><dd>'+fmtN(lit,0)+' L</dd><dt>Günlük ortalama</dt><dd>'+(days?fmtN(lit/days)+' L ('+days+' gün)':'—')+'</dd><dt>Doğum</dt><dd>'+live.length+' canlı'+(bs.length-live.length?', '+(bs.length-live.length)+' ölü':'')+(live.length?' ('+live.filter(function(b){return b.sex==='Dişi'}).length+' dişi, '+live.filter(function(b){return b.sex==='Erkek'}).length+' erkek)':'')+'</dd><dt>Satılan</dt><dd>'+sold.length+(sold.length&&sum(sold,function(a){return a.exitPrice||0})?' · '+fmtN(sum(sold,function(a){return a.exitPrice||0}),0)+' ₺':'')+'</dd><dt>Ölen</dt><dd>'+dead.length+'</dd></dl></div>';
+  h+=moneyCard(from,t);
+  h+='<div class="card"><h3>Excel dosyası olarak indir</h3><p class="muted" style="margin-top:0">CSV dosyaları Excel ile açılır.</p><div class="row-actions"><button class="btn" data-act="csvAnimals"'+(dlCap?'':' disabled')+'>Hayvan listesi</button><button class="btn" data-act="csvMilk"'+(dlCap?'':' disabled')+'>Süt kayıtları ('+(repPeriod==='ay'?'bu ay':repPeriod==='3ay'?'3 ay':'1 yıl')+')</button></div>'+(dlCap?'':'<p class="muted" style="margin-bottom:0">Bu görünümde dosya indirme kapalı.</p>')+'</div>';
+  return h+viewBackup();
+}
+function viewBackup(){
+  var n=COLS.map(function(c){return state[c].length}).reduce(function(a,b){return a+b},0);
+  var th=getTheme();
+  var themeCard='<div class="card"><h3>Görünüm</h3><p class="muted" style="margin-top:0">Tema seçimi bu cihazda hatırlanır.</p><div class="chips" style="margin:0">'+[['auto','Otomatik'],['light','Açık'],['dark','Koyu']].map(function(t){return '<button data-act="setTheme" data-v="'+t[0]+'" aria-pressed="'+(th===t[0])+'">'+t[1]+'</button>'}).join('')+'</div></div>';
+  var wipeCard=localMode?'<div class="card"><h3>Tüm kayıtları sil</h3><p class="muted" style="margin-top:0">Bu cihazdaki bütün hayvan, süt, yem ve diğer kayıtları siler ve boş bir defterle başlarsın. Geri alınamaz, istersen önce yedek indir.</p><div class="row-actions"><button class="btn danger" data-act="wipeAll">Hepsini sil</button></div></div>':'';
+  return themeCard+'<div class="card"><h3>Yedek</h3><p class="muted" style="margin-top:0">Tüm kayıtları ve fotoğrafları tek dosyada indirir. Telefon değiştirirsen ya da bir şey silinirse bu dosyadan geri yükleyebilirsin.</p><div class="row-actions"><button class="btn primary" data-act="backup"'+((dlCap||STANDALONE)?'':' disabled')+'>Yedek indir</button><button class="btn" data-act="restore">Yedekten yükle</button></div>'+((dlCap||STANDALONE)?'':'<p class="muted">Bu görünümde dosya indirme kapalı. Sayfayı claude.ai üzerinden aç.</p>')+'</div>'+
+  wipeCard+'<div class="card"><h3>Saklama</h3><p class="muted" style="margin:0">'+(localMode?'Kayıtlar yalnızca bu cihazdaki tarayıcıda tutuluyor, tarayıcı verisi silinirse kaybolur. Düzenli yedek al.':'Kayıtlar bu sayfanın veri deposunda tutuluyor. Sayfa güncellense bile silinmez.')+' Şu an '+n+' kayıt var. Gebelik süresi varsayılan '+GEST+' gün (hayvan kartından hayvana göre değiştirilebilir), kuruya çıkarma doğumdan '+DRY+' gün önce, kızgınlık döngüsü '+CYCLE+' gün olarak hesaplanır.</p></div>';
+}
+
+/* ---------- yönlendirme ve çizim ---------- */
+function parseRoute(){
+  var h=(location.hash||'').slice(1);
+  if(h.indexOf('a-')===0) return {k:'animal',id:h.slice(2)};
+  if(h==='yedek') h='rapor';
+  return {k:['hayvanlar','sut','yem','rapor'].indexOf(h)>=0?h:'bugun'};
+}
+function isEditing(){var el=document.activeElement;return !!(el&&el.closest&&el.closest('#view')&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))}
+function render(force){
+  if(!force&&isEditing()){dirty=true;return}
+  dirty=false; idx();
+  var r=parseRoute();
+  watchPhotos(r.k==='animal'?r.id:null);
+  document.querySelectorAll('#nav a').forEach(function(a){
+    var on=a.dataset.r===(r.k==='animal'?'hayvanlar':r.k);
+    if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
+  });
+  var n=new Date();
+  $('#today').textContent=DAYN[n.getDay()]+', '+n.getDate()+' '+MONF[n.getMonth()]+' '+n.getFullYear();
+  var b='';
+  if(staleNote) b+='<div class="banner">Kayıtlar henüz sunucudan doğrulanamadı. Gördüklerin eski olabilir.</div>';
+  if(localMode&&!STANDALONE) b+='<div class="banner">Kalıcı depo bu görünümde kapalı. Kayıtlar yalnızca bu tarayıcıda saklanıyor.</div>';
+  var body;
+  if(loading) body='<p class="muted" style="margin-top:24px">Kayıtlar yükleniyor…</p>';
+  else if(r.k==='animal') body=viewAnimal(r.id);
+  else body={bugun:viewToday,hayvanlar:viewAnimals,sut:viewMilk,yem:viewFeed,rapor:viewReport}[r.k]();
+  view.innerHTML=b+body;
+}
+
+/* ---------- form sayfası ---------- */
+function fieldHtml(f){
+  var id='f_'+f.name,val=f.value==null?'':f.value,c;
+  if(f.type==='select'){
+    c='<select id="'+id+'">'+f.options.map(function(o){o=typeof o==='string'?{v:o,l:o}:o;return '<option value="'+esc(o.v)+'"'+(String(o.v)===String(val)?' selected':'')+'>'+esc(o.l)+'</option>'}).join('')+'</select>';
+  }else if(f.type==='textarea'){
+    c='<textarea id="'+id+'" rows="2">'+esc(val)+'</textarea>';
+  }else{
+    c='<input id="'+id+'" type="'+(f.type==='number'?'text':(f.type||'text'))+'"'+(f.type==='number'?' inputmode="decimal"':'')+' value="'+esc(val)+'"'+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+' autocomplete="off">';
+    if(f.list) c+='<div class="chips sg">'+f.list.map(function(x){return '<button type="button" data-act="sugg" data-id="f_'+f.name+'" data-v="'+esc(x)+'">'+esc(x)+'</button>'}).join('')+'</div>';
+  }
+  return '<div class="field"'+(f.showIf?' data-if="'+f.showIf[0]+'" data-eq="'+esc(f.showIf[1])+'"':'')+'><label for="'+id+'">'+esc(f.label)+(f.required?' *':'')+'</label>'+c+'</div>';
+}
+function closeSheet(){sheet.hidden=true;sheet.innerHTML='';sheetDeleteFn=null}
+function openSheet(o){
+  sheetDeleteFn=o.onDelete||null;
+  sheet.innerHTML='<div class="sheet-bg" data-act="closeSheet"></div><form class="sheet-body" id="sheetForm" novalidate><h2>'+esc(o.title)+'</h2>'+(o.extra||'')+(o.fields||[]).map(fieldHtml).join('')+'<div class="row-actions"><button type="submit" class="btn primary">'+(o.submit||'Kaydet')+'</button>'+(o.onDelete?'<button type="button" class="btn danger" data-act="sheetDelete">Sil</button>':'')+'<button type="button" class="btn" data-act="closeSheet">Vazgeç</button></div></form>';
+  sheet.hidden=false;
+  var form=$('#sheetForm');
+  var syncIf=function(){form.querySelectorAll('[data-if]').forEach(function(w){var c=form.querySelector('#f_'+w.dataset.if);w.hidden=!c||w.dataset.eq.split('|').indexOf(c.value)<0})};
+  form.addEventListener('change',syncIf); syncIf();
+  form.onsubmit=async function(e){
+    e.preventDefault();
+    var v={};
+    (o.fields||[]).forEach(function(f){
+      var raw=form.querySelector('#f_'+f.name).value;
+      v[f.name]=f.type==='number'?num(raw):raw.trim();
+    });
+    var miss=(o.fields||[]).find(function(f){return f.required&&(v[f.name]==null||v[f.name]==='')});
+    if(miss){toast(miss.label+' gerekli');return}
+    try{await o.onSubmit(v);closeSheet()}catch(err){toast(errText(err))}
+  };
+}
+var animalOpts=function(fn,keep){return state.animals.filter(function(x){return (active(x)||x.id===keep)&&(!fn||fn(x))}).sort(byName).map(function(a){return {v:a.id,l:aLbl(a)}})};
+var pick=function(extra){return [{v:'',l:'Seçin'}].concat(extra||[]).concat([])};
+
+function formAnimal(id){
+  var ex=id?byId(id):null;
+  openSheet({title:ex?'Hayvanı düzenle':'Hayvan ekle',fields:[
+    {name:'tag',label:'Küpe no (henüz yoksa boş bırak)',value:ex&&ex.tag,ph:'TR 34 0123 4567'},
+    {name:'name',label:'İsim',value:ex&&ex.name},
+    {name:'status',label:'Durum',type:'select',options:STATUSES,value:(ex&&ex.status)||'Sağmal'},
+    {name:'sex',label:'Cinsiyet',type:'select',options:['Dişi','Erkek'],value:(ex&&ex.sex)||'Dişi',showIf:['status','Buzağı']},
+    {name:'birth',label:'Doğum tarihi',type:'date',value:ex&&ex.birth},
+    {name:'calved',label:'Son buzağılama tarihi (biliyorsan)',type:'date',value:ex&&ex.calved,showIf:['status','Sağmal|Kuru']},
+    {name:'motherId',label:'Anaç (annesi)',type:'select',options:[{v:'',l:'Bilinmiyor / sürüde yok'}].concat(animalOpts(function(x){return x.id!==id&&canBreed(x)},ex&&ex.motherId)),value:ex&&ex.motherId}
+  ].concat(sireFields(ex),[
+    {name:'breed',label:'Irk',value:ex&&ex.breed,list:Array.from(new Set(['Holstein','Simental','Montofon','Jersey','Yerli kara','Melez'].concat(state.animals.map(function(x){return x.breed}).filter(Boolean))))},
+    {name:'pen',label:'Padok / grup',value:ex&&ex.pen,list:Array.from(new Set(state.animals.map(function(x){return x.pen}).filter(Boolean)))},
+    {name:'gest',label:'Gebelik süresi (gün). Boşsa '+GEST+' alınır',type:'number',value:ex&&ex.gest,ph:String(GEST),showIf:['status','Sağmal|Kuru|Düve']},
+    {name:'note',label:'Not',type:'textarea',value:ex&&ex.note}]),onSubmit:async function(v){
+    if(!v.tag&&!v.name) throw new Error('Küpe no ya da isim yazın. Küpe sonradan eklenebilir.');
+    resolveSire(v);
+    v.gest=(v.gest>0)?Math.round(v.gest):null;
+    if(BULLS.indexOf(v.status)>=0) v.sex='Erkek'; else if(canBreed(v)) v.sex='Dişi';
+    var nid=await put('animals',Object.assign({},ex||{created:today()},v));
+    if(!ex) location.hash='#a-'+nid;
+  },onDelete:ex?async function(){
+    for(const i of state.ins.filter(function(x){return x.animalId===id})) await del('ins',i.id);
+    for(const h of state.health.filter(function(x){return x.animalId===id})) await del('health',h.id);
+    for(const p of state.photos.filter(function(x){return x.animalId===id})) await del('photos',p.id);
+    for(const hh of state.heats.filter(function(x){return x.animalId===id})) await del('heats',hh.id);
+    for(const r of state.rations.filter(function(x){return x.scope==='animal'&&x.key===id})) await del('rations',r.id);
+    await del('animals',id);
+    location.hash='#hayvanlar';
+  }:null});
+}
+function feedItems(){return Array.from(new Set(['Süt yemi','Saman','Yonca','Silaj','Arpa','Kepek','Mısır'].concat(state.rations.map(function(x){return x.item}),state.stock.map(function(x){return x.item}),state.feed.map(function(x){return x.item}))))}
+function formRation(scope,key,id){
+  var ex=id?state.rations.find(function(x){return x.id===id}):null;
+  openSheet({title:ex?'Yem kalemini düzenle':'Yem kalemi ekle',fields:[
+    {name:'item',label:'Yem cinsi',list:feedItems(),value:ex&&ex.item,required:true},
+    {name:'kg',label:'Günlük miktar (kg/baş)',type:'number',value:ex&&ex.kg,required:true},
+    {name:'perL',label:'Süt başına ek (kg/litre, isteğe bağlı)',type:'number',value:ex&&ex.perL}
+  ],onSubmit:function(v){return put('rations',Object.assign({},ex||{scope:scope,key:key},{item:v.item,kg:v.kg,perL:v.perL||0}))},
+  onDelete:ex?function(){return del('rations',ex.id)}:null});
+}
+function formStock(id){
+  var ex=id?state.stock.find(function(x){return x.id===id}):null;
+  openSheet({title:ex?'Stok girişini düzenle':'Stok girişi',fields:[
+    {name:'date',label:'Tarih',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'item',label:'Yem cinsi',list:feedItems(),value:ex&&ex.item,required:true},
+    {name:'kg',label:'Miktar (kg, sayım düzeltmesi için eksi)',type:'number',value:ex&&ex.kg,required:true},
+    {name:'price',label:'Fiyat (₺/kg)',type:'number',value:ex&&ex.price},
+    {name:'note',label:'Not (satıcı, mevcut stok vb.)',value:ex&&ex.note}
+  ],onSubmit:function(v){return put('stock',Object.assign({},ex||{},v))},
+  onDelete:ex?function(){return del('stock',ex.id)}:null});
+}
+async function applyPlan(){
+  var need=herdNeed(), t=today(), keys=Object.keys(need);
+  if(!keys.length) return;
+  for(const k of keys){
+    var x=need[k];
+    await put('feed',{id:'plan_'+t+'_'+hash(k),date:t,animalId:'',item:x.item,kg:Math.round(x.kg*10)/10,price:lastPrice(x.item)||0});
+  }
+  toast('Bugünün yemlemesi kaydedildi.');
+}
+function formHeat(opt){
+  opt=opt||{};
+  var ex=opt.id?state.heats.find(function(x){return x.id===opt.id}):null;
+  openSheet({title:ex?'Kızgınlığı düzenle':'Kızgınlık kaydet',fields:[
+    {name:'animalId',label:'Hayvan',type:'select',options:pick(animalOpts(canBreed,ex?ex.animalId:opt.animalId)),value:ex?ex.animalId:opt.animalId,required:true},
+    {name:'date',label:'Kızgınlığın görüldüğü gün',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'note',label:'Belirtiler / not',value:ex&&ex.note,ph:'Örn. binmeye durdu, akıntı var'}
+  ],onSubmit:function(v){return put('heats',Object.assign({},ex||{},v))},
+  onDelete:ex?function(){return del('heats',ex.id)}:null});
+}
+var EXITS=['Satıldı','Öldü','Kesildi','Diğer'];
+function formExit(id){
+  var a=byId(id); if(!a) return;
+  openSheet({title:'Sürüden çıkar',submit:'Sürüden çıkar',fields:[
+    {name:'exitType',label:'Neden',type:'select',options:EXITS,value:'Satıldı'},
+    {name:'exitDate',label:'Tarih',type:'date',value:today(),required:true},
+    {name:'exitPrice',label:'Satış bedeli (₺, satıldıysa)',type:'number'},
+    {name:'exitNote',label:'Alıcı / ölüm nedeni / not',type:'textarea'}
+  ],onSubmit:function(v){return put('animals',Object.assign({},a,v))}});
+}
+function formIns(opt){
+  opt=opt||{};
+  var ex=opt.id?state.ins.find(function(x){return x.id===opt.id}):null;
+  openSheet({title:ex?'Tohumlamayı düzenle':'Tohumlama kaydet',fields:[
+    {name:'animalId',label:'Dişi hayvan',type:'select',options:pick(animalOpts(canBreed,ex?ex.animalId:opt.animalId)),value:ex?ex.animalId:opt.animalId,required:true},
+    {name:'date',label:'Tohumlama tarihi',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'method',label:'Yöntem',type:'select',options:['Suni tohumlama','Doğal aşım'],value:(ex&&ex.method)||'Suni tohumlama'}
+  ].concat(sireFields(ex),[
+    {name:'by',label:'Tohumlayan',value:ex&&ex.by},
+    {name:'result',label:'Sonuç',type:'select',options:Object.keys(RESULT).map(function(k){return {v:k,l:RESULT[k]}}),value:(ex&&ex.result)||'bekliyor'}
+  ]),onSubmit:function(v){return put('ins',Object.assign({},ex||{},resolveSire(v)))},
+  onDelete:ex?function(){return del('ins',ex.id)}:null});
+}
+function formBirth(animalId){
+  var p=animalId&&byId(animalId)?preg(byId(animalId)):null;
+  openSheet({title:'Doğum kaydet',fields:[
+    {name:'animalId',label:'Anaç (doğuran)',type:'select',options:pick(animalOpts(canBreed)),value:animalId,required:true},
+    {name:'date',label:'Doğum tarihi',type:'date',value:today(),required:true},
+    {name:'outcome',label:'Sonuç',type:'select',options:[{v:'canli',l:'Canlı doğum'},{v:'olu',l:'Ölü doğum'}],value:'canli'},
+    {name:'calfTag',label:'Buzağı küpe no (henüz yoksa boş bırak)',ph:'Küpe takılınca hayvan kartından eklenir'},
+    {name:'calfName',label:'Buzağı adı'},
+    {name:'sex',label:'Cinsiyet',type:'select',options:['Dişi','Erkek']},
+    {name:'weight',label:'Doğum ağırlığı (kg)',type:'number'},
+  ].concat(sireFields(p&&p.ins),[{name:'note',label:'Not',type:'textarea'}]),onSubmit:async function(v){
+    resolveSire(v);
+    var mother=byId(v.animalId), calfId=null;
+    if(v.outcome==='canli'){
+      if(!v.calfTag&&!v.calfName) v.calfName=((mother&&(mother.name||mother.tag))||'Anne')+' buzağısı';
+      calfId=await put('animals',{tag:v.calfTag,name:v.calfName,status:'Buzağı',sex:v.sex,birth:v.date,motherId:v.animalId,sire:v.sire,sireId:v.sireId,note:'',created:today()});
+    }
+    await put('births',{animalId:v.animalId,date:v.date,outcome:v.outcome,calfId:calfId,calfTag:v.calfTag,calfName:v.calfName,sex:v.sex,weight:v.weight,sire:v.sire,sireId:v.sireId,note:v.note});
+    if(mother&&mother.status!=='Boğa') await put('animals',Object.assign({},mother,{status:'Sağmal'}));
+    toast(calfId?'Doğum kaydedildi, buzağı sürüye eklendi.':'Doğum kaydedildi.');
+  }});
+}
+var HTYPES=['Hastalık','Tedavi','Aşı','Muayene','Diğer'];
+function formHealth(opt){
+  opt=opt||{};
+  var ex=opt.id?state.health.find(function(x){return x.id===opt.id}):null;
+  openSheet({title:ex?'Sağlık kaydını düzenle':'Sağlık kaydı',fields:[
+    {name:'animalId',label:'Hayvan',type:'select',options:pick(animalOpts(null,ex?ex.animalId:opt.animalId)),value:ex?ex.animalId:opt.animalId,required:true},
+    {name:'date',label:'Tarih',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'type',label:'Tür',type:'select',options:HTYPES,value:ex&&ex.type},
+    {name:'note',label:'İlaç / açıklama',value:ex&&ex.note},
+    {name:'wd',label:'Süt bekleme süresi (gün, yoksa 0)',type:'number',value:ex?ex.wd:0},
+    {name:'next',label:'Hatırlatma tarihi (sonraki aşı, kontrol vb., isteğe bağlı)',type:'date',value:ex&&ex.next}
+  ],onSubmit:function(v){v.wd=v.wd||0;return put('health',Object.assign({},ex||{},v))},
+  onDelete:ex?function(){return del('health',ex.id)}:null});
+}
+function formFeed(id){
+  var ex=id?state.feed.find(function(x){return x.id===id}):null;
+  var items=Array.from(new Set(['Süt yemi','Saman','Yonca','Silaj','Arpa','Kepek','Mısır'].concat(state.feed.map(function(x){return x.item}))));
+  var last=state.feed.slice().sort(function(a,b){return b.date.localeCompare(a.date)})[0];
+  openSheet({title:ex?'Yem kaydını düzenle':'Yem kaydı',fields:[
+    {name:'date',label:'Tarih',type:'date',value:ex?ex.date:today(),required:true},
+    {name:'animalId',label:'Kime',type:'select',options:[{v:'',l:'Tüm sürü'}].concat(animalOpts()),value:ex&&ex.animalId},
+    {name:'item',label:'Yem cinsi',value:ex?ex.item:(last&&last.item),list:items,required:true},
+    {name:'kg',label:'Miktar (kg)',type:'number',value:ex&&ex.kg,required:true},
+    {name:'price',label:'Fiyat (₺/kg)',type:'number',value:ex?ex.price:(last&&last.price)}
+  ],onSubmit:function(v){return put('feed',Object.assign({},ex||{},v))},
+  onDelete:ex?function(){return del('feed',ex.id)}:null});
+}
+
+/* ---------- fotoğraf ---------- */
+function loadImg(src){return new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i)};i.onerror=rej;i.src=src})}
+async function shrink(src,max,q){
+  var i=await loadImg(src), r=Math.min(1,max/Math.max(i.width,i.height)), c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(i.width*r)); c.height=Math.max(1,Math.round(i.height*r));
+  c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',q);
+}
+async function fileToData(file){
+  var url=URL.createObjectURL(file);
+  try{
+    var q=.74,out=await shrink(url,720,q);
+    while(out.length>170000&&q>.36){q-=.1;out=await shrink(url,720,q)}
+    return out;
+  }finally{URL.revokeObjectURL(url)}
+}
+$('#photoIn').addEventListener('change',async function(e){
+  var f=e.target.files&&e.target.files[0]; e.target.value='';
+  var r=parseRoute(); if(!f||r.k!=='animal') return;
+  try{
+    toast('Fotoğraf işleniyor…');
+    var data=await fileToData(f), a=byId(r.id);
+    await put('photos',{animalId:r.id,date:today(),data:data});
+    if(a&&!a.thumb) await put('animals',Object.assign({},a,{thumb:await shrink(data,160,.72)}));
+    toast('Fotoğraf eklendi.');
+  }catch(err){toast(errText(err))}
+});
+function openPhoto(pid){
+  var ph=state.photos.find(function(x){return x.id===pid}); if(!ph) return;
+  openSheet({title:dlong(ph.date),fields:[],submit:'Profil fotoğrafı yap',extra:'<img class="bigph" src="'+ph.data+'" alt="">',
+    onSubmit:async function(){var a=byId(ph.animalId);if(a)await put('animals',Object.assign({},a,{thumb:await shrink(ph.data,160,.72)}))},
+    onDelete:function(){return del('photos',pid)}});
+}
+
+/* ---------- süt girişi ---------- */
+function saveMilk(aid){
+  var row=document.querySelector('[data-row="'+aid+'"]'); if(!row) return;
+  var am=num(row.querySelector('[data-p=am]').value), pm=num(row.querySelector('[data-p=pm]').value), d=milkDate, key=aid+'_'+d;
+  enq(key,async function(){
+    if(am==null&&pm==null){if(MI.has(key)) await del('milk',key)}
+    else await put('milk',{id:key,animalId:aid,date:d,am:am,pm:pm});
+  });
+}
+document.addEventListener('input',function(e){
+  if(!e.target.classList||!e.target.classList.contains('milk-in')) return;
+  var t=0; document.querySelectorAll('.mrow').forEach(function(r){r.querySelectorAll('.milk-in').forEach(function(i){t+=num(i.value)||0})});
+  var el=$('#mTotal'); if(el) el.textContent=fmtN(t);
+});
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.classList&&el.classList.contains('milk-in')){saveMilk(el.closest('.mrow').dataset.row);return}
+  if(el.id==='milkDate'&&el.value){el.blur();milkDate=el.value;render(true)}
+});
+view.addEventListener('focusout',function(){if(dirty)setTimeout(function(){if(!isEditing())render()},60)});
+
+/* ---------- yedek ---------- */
+async function doBackup(){
+  var data={}, n=0;
+  COLS.forEach(function(c){data[c]=state[c].map(function(x){return x});n+=state[c].length});
+  if(db){var s=await db.collection('photos').get();data.photos=s.docs.map(function(d){return Object.assign({id:d.id},d.data())})}
+  else data.photos=state.photos;
+  var payload={app:'suru-defteri',v:1,date:today(),data:data};
+  if(!dlCap){var bl=new Blob([JSON.stringify(payload)],{type:'application/json'}),u=URL.createObjectURL(bl),lk=document.createElement('a');lk.href=u;lk.download='suru-defteri-yedek-'+today()+'.json';document.body.appendChild(lk);lk.click();lk.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);toast('Yedek indirildi.');return}
+  try{await dlCap.save({filename:'suru-defteri-yedek-'+today()+'.json',data:JSON.stringify(payload)});toast('Yedek hazır.')}
+  catch(e){if(!e||e.code!=='declined')toast(errText(e))}
+}
+$('#restoreIn').addEventListener('change',async function(e){
+  var f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return;
+  try{
+    var j=JSON.parse(await f.text());
+    if(!j||j.app!=='suru-defteri'||!j.data) throw new Error('Bu dosya bir Sürü Defteri yedeği değil.');
+    pending=j.data;
+    var cnt=COLS.concat(['photos']).map(function(c){return (pending[c]||[]).length}).reduce(function(a,b){return a+b},0);
+    openSheet({title:'Yedekten yükle',fields:[],submit:'Yükle',extra:'<p class="muted" style="margin:0">'+cnt+' kayıt bulundu ('+esc(j.date||'')+'). Aynı kayıtlar üzerine yazılır, mevcut diğer kayıtlar silinmez.</p>',
+      onSubmit:async function(){
+        var d=pending; pending=null;
+        for(const c of COLS.concat(['photos'])){
+          for(const r of (d[c]||[])){var b=Object.assign({},r);var id=b.id;delete b.id;if(id)await rawSet(c,id,b)}
+        }
+        if(!db){lsSave();render(true)}
+        toast('Yedek yüklendi.');
+      }});
+  }catch(err){toast(errText(err))}
+});
+
+/* ---------- eylemler ---------- */
+var ACT={
+  sugg:function(id,v){var i=document.getElementById(id);if(i){i.value=v;i.focus()}},
+  closeSheet:function(){closeSheet()},
+  sheetDelete:async function(id,v,el){
+    if(!el.dataset.armed){el.dataset.armed='1';el.textContent='Silmek için tekrar dokun';return}
+    if(sheetDeleteFn){var fn=sheetDeleteFn;await fn()}
+    closeSheet();
+  },
+  addAnimal:function(){formAnimal()},
+  editAnimal:function(id){formAnimal(id)},
+  exitAnimal:function(id){formExit(id)},
+  reinstate:async function(id){var a=byId(id);if(!a)return;var b=Object.assign({},a);['exitType','exitDate','exitPrice','exitNote'].forEach(function(k){delete b[k]});await put('animals',b);toast('Hayvan sürüye geri alındı.')},
+  addIns:function(id){formIns({animalId:id})},
+  editIns:function(id){formIns({id:id})},
+  insResult:async function(id,v){var i=state.ins.find(function(x){return x.id===id});if(i)await put('ins',Object.assign({},i,{result:v}))},
+  setDry:async function(id){var a=byId(id);if(a)await put('animals',Object.assign({},a,{status:'Kuru',dryDate:today()}))},
+  addBirth:function(id){formBirth(id)},
+  addMoney:function(){formMoney()},
+  editMoney:function(id){formMoney(id)},
+  addHeat:function(id){formHeat({animalId:id})},
+  editHeat:function(id){formHeat({id:id})},
+  addHealth:function(id){formHealth({animalId:id})},
+  editHealth:function(id){formHealth({id:id})},
+  addFeed:function(){formFeed()},
+  feedTab:function(id,v){feedTab=v;render(true)},
+  addRation:function(id,v){formRation(v,id)},
+  editRation:function(id){var r=state.rations.find(function(x){return x.id===id});if(r)formRation(r.scope,r.key,id)},
+  clearOwn:async function(id){for(const r of state.rations.filter(function(x){return x.scope==='animal'&&x.key===id})) await del('rations',r.id)},
+  addStock:function(){formStock()},
+  editStock:function(id){formStock(id)},
+  applyPlan:function(){return applyPlan()},
+  setTarget:function(id,v){return put('meta',{id:'settings',targetDays:Number(v)})},
+  editFeed:function(id){formFeed(id)},
+  photoAdd:function(){$('#photoIn').click()},
+  photoOpen:function(id){openPhoto(id)},
+  filter:function(id,v){filterV=v;render(true)},
+  goFilter:function(id,v){filterV=v;location.hash='#hayvanlar'},
+  repPeriod:function(id,v){repPeriod=v;render(true)},
+  csvAnimals:function(){return csvAnimals()},
+  csvMilk:function(){return csvMilk()},
+  milkPrev:function(){milkDate=addDays(milkDate||today(),-1);render(true)},
+  milkNext:function(){milkDate=addDays(milkDate||today(),1);render(true)},
+  backup:function(){return (dlCap||STANDALONE)?doBackup():null},
+  setTheme:function(id,v){try{localStorage.setItem('suru-tema',v)}catch(e){}applyTheme(v);render(true)},
+  wipeAll:function(id,v,el){if(!el.dataset.armed){el.dataset.armed='1';el.textContent='Silmek için tekrar dokun';return}
+    COLS.concat(['photos']).forEach(function(c){state[c]=[]});lsSave();toast('Tüm kayıtlar silindi.');location.hash='#bugun';render(true)},
+  restore:function(){$('#restoreIn').click()}
+};
+document.addEventListener('click',function(e){
+  var el=e.target.closest&&e.target.closest('[data-act]'); if(!el) return;
+  var fn=ACT[el.dataset.act]; if(!fn) return;
+  e.preventDefault();
+  Promise.resolve(fn(el.dataset.id,el.dataset.v,el)).catch(function(err){toast(errText(err))});
+});
+window.addEventListener('hashchange',function(){window.scrollTo(0,0);render(true)});
+
+/* ---------- açılış ---------- */
+render(true);
+(async function(){
+  try{
+    if(window.claude&&window.claude.use){
+      db=await window.claude.use('db');
+      dlCap=await window.claude.use('downloads');
+    }
+  }catch(e){db=null}
+  if(!dlCap&&STANDALONE)dlCap={save:async function(o){var bl=new Blob([o.data],{type:'application/octet-stream'}),u=URL.createObjectURL(bl),lk=document.createElement('a');lk.href=u;lk.download=o.filename;document.body.appendChild(lk);lk.click();lk.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}};
+  if(db){startSync()}
+  else{
+    localMode=true;
+    var s=lsLoad();
+    COLS.concat(['photos']).forEach(function(c){state[c]=s[c]||[]});
+    loading=false; render(true);
+  }
+})();
+})();
+</script>
+</body></html>
