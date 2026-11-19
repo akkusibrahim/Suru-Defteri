@@ -215,7 +215,7 @@ svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-l
 .sheet-body h2{font:600 22px/1 var(--display);letter-spacing:.03em;text-transform:uppercase;color:var(--fg);margin:0}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;max-width:min(92vw,420px)}
 @media (prefers-reduced-motion:no-preference){.sheet-body{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.4}}}
-.gd details{border-top:1px solid var(--line);padding:8px 0}.gd summary{font-weight:700;cursor:pointer}.gd p{font-size:14px;line-height:1.5;margin:6px 0}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+.gd details{border-top:1px solid var(--line);padding:8px 0}.gd summary{font-weight:700;cursor:pointer}.gd p{font-size:14px;line-height:1.5;margin:6px 0}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}.gd ol{padding-left:20px;margin:6px 0}.gd li{font-size:14px;line-height:1.5;margin:4px 0}.gd .tip{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45;margin:8px 0}.gd figure{margin:10px 0}.gd figure img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line);display:block}.gd figcaption{font-size:12px;color:var(--muted);margin-top:4px}
 </style>
 
 <div class="wrap">
@@ -776,7 +776,7 @@ function viewPlan(){
     h+='<div class="list">'+keys.map(function(k){return '<div class="li"><span class="a"><b>'+esc(need[k].item)+'</b></span><b>'+fmtN(need[k].kg)+' kg</b></div>'}).join('')+'</div><p class="muted" style="margin:10px 0 0">Toplam '+fmtN(sum(keys,function(k){return need[k].kg}))+' kg/gün, '+keys.length+' çeşit yem, '+A.length+' hayvan.</p><div class="row-actions"><button class="btn primary" data-act="applyPlan">Bugünün yemlemesini kaydet</button></div>';
   }else h+='<p class="muted" style="margin:0">Henüz rasyon tanımlı değil. Aşağıda her grup için günlük yem kalemlerini gir.</p>';
   h+='</div>';
-  h+='<p class="muted" style="font-size:13px">Miktarlar ırka, canlı ağırlığa, süt verimine ve kaba yem kalitesine göre değişir. Değerleri veteriner ya da yem danışmanınla belirle, uygulama toplamı, stoğu ve maliyeti hesaplar. Yemi tek tek ya da karma (karışım) olarak girebilirsin: karma yemde karışımın adını yazıp içindeki yemlerin paylarını girersin, stok her yemden payı kadar düşülür. Sağmal hayvanlarda "süt başına ek" alanı, son 7 günlük süt ortalamasına göre kesif yemi otomatik ayarlar.</p>';
+  h+='<p class="muted" style="font-size:13px">Miktarlar ırka, canlı ağırlığa, süt verimine ve kaba yem kalitesine göre değişir. Değerleri veteriner ya da yem danışmanınla belirle, uygulama toplamı, stoğu ve maliyeti hesaplar. Yemi tek tek ya da karma (karışım) olarak girebilirsin: karma yemde karışımın adını yazıp içindeki yemlerin paylarını girersin, stok her yemden payı kadar düşülür. Yalnızca Sağmal hayvanlarda görünen "süt başına ek" alanı, son 7 günlük süt ortalamasına göre kesif yemi otomatik ayarlar.</p>';
   h+='<h2>Gruplara göre rasyon (kg/baş/gün)</h2>';
   STATUSES.filter(function(s){return A.some(function(a){return a.status===s})}).forEach(function(s){
     var n=A.filter(function(a){return a.status===s}).length, it=state.rations.filter(function(r){return r.scope==='status'&&r.key===s});
@@ -1019,6 +1019,8 @@ function formRation(scope,key,id){
     {name:'kg',label:'Günlük miktar (kg/baş)',type:'number',value:ex&&ex.kg,required:true},
     {name:'perL',label:'Süt başına ek (kg/litre, isteğe bağlı)',type:'number',value:ex&&ex.perL}
   ];
+  var ka=scope==='animal'?byId(key):null, milky=(scope==='status'&&key==='Sağmal')||(ka&&ka.status==='Sağmal')||!!(ex&&ex.perL>0);
+  if(!milky) fl=fl.filter(function(f){return f.name!=='perL'});
   for(var i=1;i<=4;i++){
     fl.push({name:'c'+i,label:'Karışımdaki '+i+'. yem',list:feedItems(),value:mx[i-1]&&mx[i-1].item,showIf:['kind','Karma yem (karışım)']});
     fl.push({name:'p'+i,label:i+'. yemin payı (örn. 50 yazarsan yarısı)',type:'number',value:mx[i-1]&&mx[i-1].pct,showIf:['kind','Karma yem (karışım)']});
@@ -1029,7 +1031,7 @@ function formRation(scope,key,id){
       for(var j=1;j<=4;j++){var nm=String(v['c'+j]||'').trim(),pc=Number(v['p'+j])||0;if(nm&&pc>0) mix.push({item:nm,pct:pc})}
       if(mix.length<2) throw new Error('Karma için en az 2 yem ve payını yazın.');
     }
-    return put('rations',Object.assign({},ex||{scope:scope,key:key},{item:v.item,kg:v.kg,perL:v.perL||0,mix:mix}))},
+    return put('rations',Object.assign({},ex||{scope:scope,key:key},{item:v.item,kg:v.kg,perL:milky?(v.perL||0):0,mix:mix}))},
   onDelete:ex?function(){return del('rations',ex.id)}:null});
 }
 function formStock(id){
